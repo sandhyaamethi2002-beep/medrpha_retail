@@ -28,8 +28,14 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  http: ^1.2.0
+  provider: ^6.1.2
+  file_picker: ^10.3.10
+
+
   flutter:
     sdk: flutter
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -64,6 +70,14 @@ flutter:
     - assets/images/img.png
     - assets/products_img/
     - assets/banner_img/
+    - assets/products/
+    - assets/ayurvedic_img/
+    - assets/ethical_img/
+    - assets/general_img/
+    - assets/generic_img/
+    - assets/surgical_img/
+    - assets/veterinary_img/
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

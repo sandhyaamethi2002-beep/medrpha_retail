@@ -1,16 +1,23 @@
-import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:medrpha/Screen/home_page.dart';
+import '../AppManager/Services/AccountS/send_login_service.dart';
 
 class OtpVerification extends StatefulWidget {
-  const OtpVerification({super.key});
+  final String mobileNumber;
+  final String otp;
+
+  const OtpVerification({
+    super.key,
+    required this.mobileNumber,
+    required this.otp,
+  });
 
   @override
-  State<OtpVerification> createState() => _OtpLoginScreenState();
+  State<OtpVerification> createState() => _OtpVerificationState();
 }
 
-class _OtpLoginScreenState extends State<OtpVerification> {
+class _OtpVerificationState extends State<OtpVerification> {
   final otp1Controller = TextEditingController();
   final otp2Controller = TextEditingController();
   final otp3Controller = TextEditingController();
@@ -21,32 +28,84 @@ class _OtpLoginScreenState extends State<OtpVerification> {
   final otp3Focus = FocusNode();
   final otp4Focus = FocusNode();
 
-  String generateOtp() {
-    final random = Random();
-    return (1000 + random.nextInt(9000)).toString();
+  bool isLoading = false;
+  String apiOtp = "";
+
+  @override
+  void initState() {
+    super.initState();
+
+    apiOtp = widget.otp;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("OTP Sent Successfully\nOTP is : $apiOtp")),
+      );
+    });
   }
 
-  void resendOtp() {
-    String otp = generateOtp();
-    debugPrint("Generated OTP: $otp");
+  Future<void> resendOtp() async {
+    try {
+      setState(() => isLoading = true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("OTP resent successfully")),
-    );
+      final service = SendLoginService();
+      final response =
+      await service.sendLoginOtp(mobileNumber: widget.mobileNumber);
+
+      if (response.status == true) {
+        apiOtp = response.otp ?? "";
+
+        // clear old otp boxes
+        otp1Controller.clear();
+        otp2Controller.clear();
+        otp3Controller.clear();
+        otp4Controller.clear();
+
+
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("New OTP is : $apiOtp")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
-  void verifyOtp() {
-    String otp = otp1Controller.text +
+  Future<void> verifyOtp() async {
+    String enteredOtp = otp1Controller.text +
         otp2Controller.text +
         otp3Controller.text +
         otp4Controller.text;
 
-    if (otp.length != 4) {
+    if (enteredOtp.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Enter valid 4 digit OTP")),
       );
       return;
     }
+
+    if (enteredOtp != apiOtp) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid OTP")),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("OTP Verified Successfully")),
+    );
 
     Navigator.pushReplacement(
       context,
@@ -80,7 +139,6 @@ class _OtpLoginScreenState extends State<OtpVerification> {
           ),
         ),
         onChanged: (value) {
-          // **Move to next box**
           if (value.length == 1) {
             if (focusNode == otp1Focus) {
               FocusScope.of(context).requestFocus(otp2Focus);
@@ -93,7 +151,6 @@ class _OtpLoginScreenState extends State<OtpVerification> {
             }
           }
 
-          // **Backspace -> move to previous box**
           if (value.isEmpty) {
             if (focusNode == otp2Focus) {
               FocusScope.of(context).requestFocus(otp1Focus);
@@ -136,9 +193,7 @@ class _OtpLoginScreenState extends State<OtpVerification> {
         ),
       ),
       body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
+        onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.all(size.width * 0.05),
@@ -146,34 +201,27 @@ class _OtpLoginScreenState extends State<OtpVerification> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: size.height * 0.02),
-
               Image.asset(
                 'assets/images/img.png',
                 fit: BoxFit.contain,
                 height: 130,
                 width: 130,
               ),
-
               const SizedBox(height: 25),
-
               const Text(
                 "Mobile Phone Verification",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 10),
-
-              const Text(
-                "Please enter the 4-digit verification code sent to your mobile number",
+              Text(
+                "Please enter the 4-digit verification code sent to ${widget.mobileNumber}",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.grey,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 30),
-
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -181,9 +229,7 @@ class _OtpLoginScreenState extends State<OtpVerification> {
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -196,9 +242,7 @@ class _OtpLoginScreenState extends State<OtpVerification> {
                   otpBox(controller: otp4Controller, focusNode: otp4Focus),
                 ],
               ),
-
               const SizedBox(height: 20),
-
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
@@ -209,31 +253,39 @@ class _OtpLoginScreenState extends State<OtpVerification> {
                   ),
                   children: [
                     TextSpan(
-                      text: "Resend",
+                      text: isLoading ? "Sending..." : "Resend",
                       style: const TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
-                      recognizer: TapGestureRecognizer()..onTap = resendOtp,
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = isLoading ? null : resendOtp,
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 30),
-
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: verifyOtp,
+                  onPressed: isLoading ? null : verifyOtp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Text(
                     "Submit",
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),

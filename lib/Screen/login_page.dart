@@ -25,7 +25,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
           FocusScope.of(context).unfocus();
         },
         child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
+          // physics: const NeverScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
+
           padding: EdgeInsets.all(size.width * 0.05),
           child: Form(
             key: _formKey,
@@ -95,14 +97,6 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginWithPassword(),
-                          ),
-                        );
-                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -111,7 +105,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                       ),
                     ),
                     child: const Text(
-                      "Login With Password",
+                      "Login With Password..",
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
@@ -128,7 +122,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const OtpVerification(),
+                            builder: (context) => const OtpVerification(mobileNumber: '', otp: '',),
                           ),
                         );
                       }
@@ -153,3 +147,4 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     );
   }
 }
+
