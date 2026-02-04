@@ -71,12 +71,7 @@ flutter:
     - assets/products_img/
     - assets/banner_img/
     - assets/products/
-    - assets/ayurvedic_img/
-    - assets/ethical_img/
-    - assets/general_img/
-    - assets/generic_img/
-    - assets/surgical_img/
-    - assets/veterinary_img/
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

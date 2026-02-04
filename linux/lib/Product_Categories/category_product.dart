@@ -18,25 +18,17 @@ class _CategoryProductState extends State<CategoryProduct> {
   void initState() {
     super.initState();
 
-    // Fetch category details when widget is initialized
     Future.microtask(() {
       context.read<CategoryDetailViewModel>().fetchCategoryDetail(widget.categoryId);
     });
   }
 
-  // Get image URL safely
   String _getImageUrl(String? productImg) {
     if (productImg == null || productImg.isEmpty) {
       return "https://via.placeholder.com/150";
     }
     if (productImg.startsWith("http")) return productImg;
     return "https://yourdomain.com/uploads/$productImg";
-  }
-
-  // Clean description to remove cut icon or unwanted characters
-  String _cleanDescription(String? description) {
-    if (description == null) return "";
-    return description.replaceAll('✂️', '').trim(); // remove cut icon
   }
 
   @override
@@ -74,20 +66,22 @@ class _CategoryProductState extends State<CategoryProduct> {
             return const Center(child: Text("No Products Found"));
           }
 
-          return ListView.builder(
+          return  ListView.builder(
             padding: const EdgeInsets.all(12),
             itemCount: vm.products.length,
-            itemBuilder: (context, index) {
-              final item = vm.products[index];
+              itemBuilder: (context, index) {
+                final item = vm.products[index];
 
-              return CategoryDetailCard(
-                imageUrl: _getImageUrl(item.productImg),
-                productsname: item.productName ?? "",
-                status: _cleanDescription(item.description), // cleaned description
-                available: item.categoryName ?? "",
-              );
-            },
+                return CategoryDetailCard(
+                  imageUrl: _getImageUrl(item.productImg),
+                  productsname: item.productName ?? "",
+                  status: "Status: ${item.status ?? 0}",
+                  available: item.categoryName ?? "",
+                );
+              }
+
           );
+
         },
       ),
     );

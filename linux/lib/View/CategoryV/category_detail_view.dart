@@ -1,51 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../ViewModel/CategoryVM/category_detail_view_model.dart';
-import '../widgets/category_detail_card.dart';
 
-class CategoryProduct extends StatefulWidget {
-  final String title;
+import '../../ViewModel/CategoryVM/category_detail_view_model.dart';
+
+
+
+class CategoryDetailView extends StatefulWidget {
   final int categoryId;
+  final String title;
 
-  const CategoryProduct({super.key, required this.title, required this.categoryId});
+  const CategoryDetailView({
+    super.key,
+    required this.categoryId,
+    required this.title,
+  });
 
   @override
-  State<CategoryProduct> createState() => _CategoryProductState();
+  State<CategoryDetailView> createState() => _CategoryDetailViewState();
 }
 
-class _CategoryProductState extends State<CategoryProduct> {
+class _CategoryDetailViewState extends State<CategoryDetailView> {
   @override
   void initState() {
     super.initState();
 
-    // Fetch category details when widget is initialized
     Future.microtask(() {
       context.read<CategoryDetailViewModel>().fetchCategoryDetail(widget.categoryId);
     });
   }
 
-  // Get image URL safely
   String _getImageUrl(String? productImg) {
+    // If API gives null image
     if (productImg == null || productImg.isEmpty) {
       return "https://via.placeholder.com/150";
     }
-    if (productImg.startsWith("http")) return productImg;
-    return "https://yourdomain.com/uploads/$productImg";
-  }
 
-  // Clean description to remove cut icon or unwanted characters
-  String _cleanDescription(String? description) {
-    if (description == null) return "";
-    return description.replaceAll('✂️', '').trim(); // remove cut icon
+    // If API returns full URL already
+    if (productImg.startsWith("http")) return productImg;
+
+    // If API returns only filename -> you can adjust base URL if needed
+    // Currently API is giving filename only, so placeholder is safe.
+    return "https://via.placeholder.com/150";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       appBar: AppBar(
         title: Text(
-          widget.title,
+          widget.title.toUpperCase(),
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -55,6 +60,7 @@ class _CategoryProductState extends State<CategoryProduct> {
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
+
       body: Consumer<CategoryDetailViewModel>(
         builder: (context, vm, child) {
           if (vm.isLoading) {
@@ -80,12 +86,7 @@ class _CategoryProductState extends State<CategoryProduct> {
             itemBuilder: (context, index) {
               final item = vm.products[index];
 
-              return CategoryDetailCard(
-                imageUrl: _getImageUrl(item.productImg),
-                productsname: item.productName ?? "",
-                status: _cleanDescription(item.description), // cleaned description
-                available: item.categoryName ?? "",
-              );
+
             },
           );
         },

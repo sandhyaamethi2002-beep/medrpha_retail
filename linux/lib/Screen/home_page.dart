@@ -5,7 +5,7 @@ import 'package:medrpha/Screen/profile_page.dart';
 import '../Product_Categories/category_product.dart';
 import '../widgets/register_user.dart';
 import 'drawer.dart';
-import 'cart_page.dart';
+import 'category_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required int selectedIndex});
@@ -440,7 +440,7 @@ class _HomePageState extends State<HomePage> {
       },
       child: Scaffold(
         drawer: DrawerPage(),
-        appBar:(_selectedIndex == 1 || _selectedIndex == 2)
+        appBar: _selectedIndex == 2
             ? null
             : AppBar(
           toolbarHeight: 60,
@@ -474,7 +474,7 @@ class _HomePageState extends State<HomePage> {
           index: _selectedIndex,
           children: [
             homeScreen(),
-            const CartPage(),
+            const CategoryPage(),
             const ProfilePage(),
           ],
         ),
@@ -505,9 +505,8 @@ class _HomePageState extends State<HomePage> {
                 label: "Home",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart_outlined
-                ),
-                activeIcon: Icon(Icons.shopping_cart),
+                icon: Icon(Icons.category_outlined),
+                activeIcon: Icon(Icons.category),
                 label: "Categories",
               ),
               BottomNavigationBarItem(

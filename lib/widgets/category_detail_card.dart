@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../Provider/cart_provider.dart';
+
 
 class CategoryDetailCard extends StatelessWidget {
   final String imageUrl;
@@ -16,148 +20,217 @@ class CategoryDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.18),
-            blurRadius: 10,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imageUrl,
-              height: 72,
-              width: 72,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 72,
-                  width: 72,
-                  color: Colors.grey.shade200,
-                  child: const Icon(Icons.image_not_supported),
-                );
-              },
+    return Consumer<CartProvider>(
+      builder: (context, cartProvider, child) {
+        // Check if item is already in cart
+        final cartItemIndex = cartProvider.cartList
+            .indexWhere((item) => item.productName == productsname);
+        final bool isInCart = cartItemIndex != -1;
+        final int qty = isInCart ? cartProvider.cartList[cartItemIndex].qty : 0;
+
+        return InkWell(
+          onTap: () {
+            // Navigate to Product Detail Page
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => ProductDetailPage(
+            //       productName: productsname,
+            //       imageUrl: imageUrl,
+            //       available: available,
+            //       status: status,
+            //     ),
+            //   ),
+            // );
+          },
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.18),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(width: 12),
-
-          // Right Side Content
-          Expanded(
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row -> Product Name + Save Icon
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        productsname,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    // Save Icon (Top Right)
-                    InkWell(
-                      onTap: () {},
-                      child: const Icon(
-                        Icons.bookmark_border,
-                        size: 22,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+                // Left Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
+                    height: 72,
+                    width: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 72,
+                        width: 72,
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.image_not_supported),
+                      );
+                    },
+                  ),
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(width: 12),
 
-
-                Row(
-                  children: [
-                    const Icon(Icons.close, size: 16, color: Colors.grey),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        status,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
+                // Right Side Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top Row -> Product Name + Save Icon
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              productsname,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {},
+                            child: const Icon(
+                              Icons.bookmark_border,
+                              size: 22,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 14),
+                      const SizedBox(height: 6),
 
-                // Bottom Row -> By available + Add Button (Bottom Right)
-                Row(
-                  children: [
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: "By ",
-                              style: TextStyle(
+                      // Status
+                      Row(
+                        children: [
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              status,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey,
                               ),
                             ),
-                            TextSpan(
-                              text: available,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // Bottom Row -> Available + Add/Qty Button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  const TextSpan(
+                                    text: "By ",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: available,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          ),
 
-                    Container(
-                      height: 40,
-                      width: 95,
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(22),
+                          // Add / Quantity Buttons
+                          isInCart
+                              ? Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blue),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove,
+                                      color: Colors.blue),
+                                  onPressed: () {
+                                    if (qty > 1) {
+                                      cartProvider
+                                          .decreaseQty(productsname);
+                                    } else {
+                                      cartProvider
+                                          .removeFromCartByName(
+                                          productsname);
+                                    }
+                                  },
+                                ),
+                                Text(
+                                  '$qty',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon:
+                                  const Icon(Icons.add, color: Colors.blue),
+                                  onPressed: () {
+                                    cartProvider.increaseQty(productsname);
+                                  },
+                                ),
+                              ],
+                            ),
+                          )
+                              : Container(
+                            height: 40,
+                            width: 95,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: TextButton.icon(
+                              onPressed: () {
+                                cartProvider.addToCart(
+                                    productsname, imageUrl, available);
+                              },
+                              icon: const Icon(Icons.add,
+                                  color: Colors.white, size: 18),
+                              label: const Text(
+                                "Add",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: TextButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.add,
-                            color: Colors.white, size: 18),
-                        label: const Text(
-                          "Add",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

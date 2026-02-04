@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medrpha/Provider/cart_provider.dart';
 import 'package:provider/provider.dart';
+
 import 'View/AccountV/send_login_view.dart';
 import 'ViewModel/CategoryVM/category_detail_view_model.dart';
+
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -29,10 +30,6 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => CategoryDetailViewModel(),
-        ),
-
-        ChangeNotifierProvider(
-          create: (_) => CartProvider(),
         ),
       ],
       child: GetMaterialApp(
