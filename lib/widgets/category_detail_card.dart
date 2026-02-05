@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../Product_Categories/product_detail_page.dart';
 import '../Provider/cart_provider.dart';
 
 
@@ -31,17 +32,17 @@ class CategoryDetailCard extends StatelessWidget {
         return InkWell(
           onTap: () {
             // Navigate to Product Detail Page
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => ProductDetailPage(
-            //       productName: productsname,
-            //       imageUrl: imageUrl,
-            //       available: available,
-            //       status: status,
-            //     ),
-            //   ),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailPage(
+                  productName: productsname,
+                  imageUrl: imageUrl,
+                  available: available,
+                  status: status,
+                ),
+              ),
+            );
           },
           borderRadius: BorderRadius.circular(18),
           child: Container(

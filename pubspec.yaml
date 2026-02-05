@@ -31,6 +31,8 @@ dependencies:
   http: ^1.2.0
   provider: ^6.1.2
   file_picker: ^10.3.10
+  google_fonts: ^6.2.1
+  url_launcher: ^6.2.5
 
 
   flutter:
@@ -71,6 +73,7 @@ flutter:
     - assets/products_img/
     - assets/banner_img/
     - assets/products/
+    - assets/medicine/
 
 
 

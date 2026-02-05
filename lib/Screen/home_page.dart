@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medrpha/Screen/profile_page.dart';
-
 import '../Product_Categories/category_product.dart';
 import '../widgets/register_user.dart';
 import 'drawer.dart';
@@ -33,17 +33,17 @@ class _HomePageState extends State<HomePage> {
             registerBanner(),
 
             buildVerticalCard(
-              Icons.person_add,
+              CupertinoIcons.person_add,
               "Create An Account",
               "Register using your mobile number, enter your name, shop name and pincode",
             ),
             buildVerticalCard(
-              Icons.verified_user,
+              CupertinoIcons.check_mark_circled_solid,
               "Complete KYC",
               "Upload any one of shop's KYC documents like GSTIN or licence",
             ),
             buildVerticalCard(
-              Icons.shopping_cart,
+              CupertinoIcons.shopping_cart,
               "Start Ordering Now",
               "Browse and order products for your shop from top sellers",
             ),
@@ -102,14 +102,14 @@ class _HomePageState extends State<HomePage> {
                 buildCategoryContainer(
                   'assets/products_img/ayurvedic.png',
                   "AYURVEDIC",
-                   const Color(0xffE6F7FF),
-                    5,
+                  const Color(0xffE6F7FF),
+                  5,
                 ),
                 buildCategoryContainer(
                   'assets/products_img/general.png',
-                    "GENERAL",
-                     const Color(0xffF3E5F5),
-                      6,
+                  "GENERAL",
+                  const Color(0xffF3E5F5),
+                  6,
                 ),
               ],
             ),
@@ -447,7 +447,7 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.blue,
           leading: Builder(
             builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, size: 30, color: Colors.white),
+              icon: const Icon(CupertinoIcons.bars, size: 30, color: Colors.white),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -464,7 +464,7 @@ class _HomePageState extends State<HomePage> {
             child: const TextField(
               decoration: InputDecoration(
                 hintText: "Search...",
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: Icon(CupertinoIcons.search),
                 border: InputBorder.none,
               ),
             ),
@@ -500,19 +500,18 @@ class _HomePageState extends State<HomePage> {
             ),
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
+                icon: Icon(CupertinoIcons.home),
+                activeIcon: Icon(CupertinoIcons.home),
                 label: "Home",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart_outlined
-                ),
-                activeIcon: Icon(Icons.shopping_cart),
-                label: "Categories",
+                icon: Icon(CupertinoIcons.shopping_cart),
+                activeIcon: Icon(CupertinoIcons.shopping_cart),
+                label: "Cart",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
+                icon: Icon(CupertinoIcons.person),
+                activeIcon: Icon(CupertinoIcons.person),
                 label: "Profile",
               ),
             ],
@@ -522,3 +521,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+

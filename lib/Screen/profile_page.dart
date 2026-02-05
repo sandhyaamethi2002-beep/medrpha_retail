@@ -26,9 +26,6 @@ class ProfilePage extends StatelessWidget {
                   // (route) => false,
             );
           },
-
-
-
         ),
 
         title: const Text(
@@ -41,7 +38,6 @@ class ProfilePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Top orange background
             Container(
               height: 80,
               width: double.infinity,
@@ -113,18 +109,8 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 10),
 
             // List items
-            _menuTile(
-              icon: CupertinoIcons.person,
-              title: "User Id",
-              subtitle: "12345",
-              onTap: () {},
-            ),
-            _menuTile(
-              icon: CupertinoIcons.book,
-              title: "Designation",
-              subtitle: "Senior Developer",
-              onTap: () {},
-            ),
+
+
             _menuTile(
               icon: CupertinoIcons.phone,
               title: "Phone",
@@ -135,6 +121,24 @@ class ProfilePage extends StatelessWidget {
               icon: CupertinoIcons.home,
               title: "Address",
               subtitle: "123, Flutter Lane, Dart Ville",
+              onTap: () {},
+            ),
+            _menuTile(
+              icon: CupertinoIcons.bell,
+              title: "Notification",
+              subtitle: "All Notification",
+              onTap: () {},
+            ),
+            _menuTile(
+              icon: CupertinoIcons.bookmark,
+              title: "Saved Items",
+              subtitle: "Saved items here",
+              onTap: () {},
+            ),
+            _menuTile(
+              icon: CupertinoIcons.square_arrow_left,
+              title: "Logout",
+              subtitle: "",
               onTap: () {},
             ),
 
