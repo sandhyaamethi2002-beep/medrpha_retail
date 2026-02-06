@@ -11,6 +11,7 @@ class ContactUs extends StatelessWidget {
     final Uri callUri = Uri(scheme: 'tel', path: number);
     await launchUrl(callUri);
   }
+
   // Map Launcher
   static void launchMap() async {
     final Uri mapUri = Uri.parse(
@@ -46,7 +47,8 @@ class ContactUs extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 25),
-              // First Card
+
+              /// 🔹 Card 1
               buildCard([
                 infoRow(
                   Icons.location_on,
@@ -62,6 +64,8 @@ class ContactUs extends StatelessWidget {
               ]),
 
               const SizedBox(height: 20),
+
+              /// 🔹 Card 2
               buildCard([
                 infoRow(
                   Icons.phone_forwarded,
@@ -70,9 +74,10 @@ class ContactUs extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 infoRow(
-                    Icons.mail,
-                    "Email Us:\nInfo@Medrpha.Com",
-                    onTap: launchEmail),
+                  Icons.mail,
+                  "Email Us:\nInfo@Medrpha.Com",
+                  onTap: launchEmail,
+                ),
                 const SizedBox(height: 20),
                 Container(
                   width: double.infinity,
@@ -88,11 +93,12 @@ class ContactUs extends StatelessWidget {
                     label: Text(
                       "Email Us",
                       style: GoogleFonts.poppins(
-                        color: Colors.white, fontSize: 16,
+                        color: Colors.white,
+                        fontSize: 16,
                       ),
                     ),
                   ),
-                )
+                ),
               ]),
             ],
           ),
@@ -100,37 +106,56 @@ class ContactUs extends StatelessWidget {
       ),
     );
   }
+
+  /// 🔹 Card UI
   Widget buildCard(List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(
-          color: Colors.blue.withOpacity(0.2),
-          blurRadius: 10,
-        )
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.2),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: Column(children: children),
     );
   }
-  Widget infoRow(IconData icon, String text, {VoidCallback? onTap}) {
+
+  /// 🔹 Info Row with Blue Arrow
+  Widget infoRow(
+      IconData icon,
+      String text, {
+        VoidCallback? onTap,
+      }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: Colors.blue, size: 26),
           const SizedBox(width: 15),
+
+          /// Text
           Expanded(
-            child: Text(text,
+            child: Text(
+              text,
               style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          )
+          ),
+
+          const Icon(
+            CupertinoIcons.chevron_right,
+            color: Colors.blue,
+            size: 20,
+          ),
         ],
       ),
     );

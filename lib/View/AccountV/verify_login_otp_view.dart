@@ -94,7 +94,7 @@ class _VerifyLoginOtpViewState extends State<VerifyLoginOtpView> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomePage(selectedIndex: 0),
+          builder: (context) => const HomePage(selectedIndex: 0, mobileNumber: null,),
         ),
       );
     }

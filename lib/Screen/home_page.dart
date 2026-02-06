@@ -2,13 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medrpha/Screen/profile_page.dart';
+import 'package:provider/provider.dart';
 import '../Product_Categories/category_product.dart';
+import '../Provider/cart_provider.dart';
 import '../widgets/register_user.dart';
-import 'drawer.dart';
+
 import 'cart_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required int selectedIndex});
+  final StringmobileNumber;
+  final int selectedIndex;
+
+  final dynamic mobileNumber;
+  
+  const HomePage({super.key, required this.mobileNumber, this.StringmobileNumber, required this.selectedIndex});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -202,7 +209,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RegisterUser(),
+                        builder: (_) => RegisterUser(mobileNumber: widget.mobileNumber,),
                       ),
                     );
                   },
@@ -285,7 +292,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ✅ UPDATED CATEGORY CARD WITH categoryId
+  //  CATEGORY CARD WITH categoryId
   Widget buildCategoryContainer(
       String imgPath,
       String title,
@@ -439,20 +446,14 @@ class _HomePageState extends State<HomePage> {
         return false;
       },
       child: Scaffold(
-        drawer: DrawerPage(),
+
         appBar:(_selectedIndex == 1 || _selectedIndex == 2)
             ? null
             : AppBar(
+          automaticallyImplyLeading: false,
           toolbarHeight: 60,
           backgroundColor: Colors.blue,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(CupertinoIcons.bars, size: 30, color: Colors.white),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            ),
-          ),
+
           title: Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -470,12 +471,71 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        body: IndexedStack(
-          index: _selectedIndex,
+        body: Stack(
           children: [
-            homeScreen(),
-            const CartPage(),
-            const ProfilePage(),
+            IndexedStack(
+              index: _selectedIndex,
+              children: [
+                homeScreen(),
+                const CartPage(),
+                const ProfilePage(mobileNumber: '',),
+              ],
+            ),
+
+            // MINI CART BAR
+            if (_selectedIndex == 0)
+              Positioned(
+                bottom: 10,
+                left: 10,
+                right: 10,
+                child: Consumer<CartProvider>(
+                  builder: (context, cart, child) {
+
+                    if (cart.cartList.isEmpty) {
+                      return const SizedBox();
+                    }
+                    int totalQty = cart.cartList.fold(
+                      0,
+                          (sum, item) => sum + item.qty,
+                    );
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1; // open cart page
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "$totalQty items added",
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+
+                            const Text(
+                              "View Cart",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         ),
         bottomNavigationBar: Theme(
@@ -500,18 +560,18 @@ class _HomePageState extends State<HomePage> {
             ),
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.home),
-                activeIcon: Icon(CupertinoIcons.home),
+                icon: Icon(CupertinoIcons.home, size: 24),
+                activeIcon: Icon(CupertinoIcons.home, size: 26),
                 label: "Home",
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.shopping_cart),
-                activeIcon: Icon(CupertinoIcons.shopping_cart),
+                icon: Icon(CupertinoIcons.shopping_cart,  size: 24),
+                activeIcon: Icon(CupertinoIcons.shopping_cart,  size: 26),
                 label: "Cart",
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.person),
-                activeIcon: Icon(CupertinoIcons.person),
+                icon: Icon(CupertinoIcons.person, size: 24),
+                activeIcon: Icon(CupertinoIcons.person, size: 26),
                 label: "Profile",
               ),
             ],

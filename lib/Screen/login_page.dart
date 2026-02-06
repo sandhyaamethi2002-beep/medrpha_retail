@@ -25,7 +25,6 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
           FocusScope.of(context).unfocus();
         },
         child: SingleChildScrollView(
-          // physics: const NeverScrollableScrollPhysics(),
           physics: const BouncingScrollPhysics(),
 
           padding: EdgeInsets.all(size.width * 0.05),
@@ -122,7 +121,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const OtpVerification(mobileNumber: '', otp: '',),
+                            builder: (context) =>  OtpVerification(
+                              mobileNumber: mobileController.text.trim(),
+                              otp: '',),
                           ),
                         );
                       }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:medrpha/Provider/cart_provider.dart';
 import 'package:provider/provider.dart';
+import 'Provider/wishlist_provider.dart';
 import 'View/AccountV/send_login_view.dart';
 import 'ViewModel/CategoryVM/category_detail_view_model.dart';
 
@@ -33,6 +34,10 @@ class MyApp extends StatelessWidget {
 
         ChangeNotifierProvider(
           create: (_) => CartProvider(),
+        ),
+
+        ChangeNotifierProvider(
+            create: (_) => WishlistProvider()
         ),
       ],
       child: GetMaterialApp(

@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:medrpha/Screen/home_page.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:medrpha/Screen/about_us.dart';
+import 'package:medrpha/Screen/home_page.dart';
+import 'package:medrpha/Screen/saved_item_page.dart';
+import 'contact_us.dart';
+import 'my_order_page.dart';
+import 'notification_page.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final String mobileNumber;
+  
+  const ProfilePage({super.key, required this.mobileNumber});
 
   @override
   Widget build(BuildContext context) {
@@ -15,26 +22,23 @@ class ProfilePage extends StatelessWidget {
         backgroundColor: primaryColor,
         elevation: 0,
         titleSpacing: 0,
-        // leadingWidth: 50,
-
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage(selectedIndex: 0)),
-                  // (route) => false,
+              MaterialPageRoute(
+                builder: (_) => HomePage(mobileNumber: mobileNumber, selectedIndex: 0),
+              ),
             );
           },
         ),
-
         title: const Text(
           "My Profile",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
-
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -44,7 +48,7 @@ class ProfilePage extends StatelessWidget {
               color: primaryColor,
             ),
 
-            // Profile card (overlapping)
+            /// PROFILE CARD
             Transform.translate(
               offset: const Offset(0, -50),
               child: Padding(
@@ -70,9 +74,10 @@ class ProfilePage extends StatelessWidget {
                         child: const Text(
                           "A",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -83,43 +88,33 @@ class ProfilePage extends StatelessWidget {
                             Text(
                               "User",
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             SizedBox(height: 4),
-                            Text(
-                              "1234567890",
-                              style: TextStyle(color: Colors.grey),
-                            ),
+                            Text("1234567890",
+                                style: TextStyle(color: Colors.grey)),
                             SizedBox(height: 2),
-                            Text(
-                              "abc@gmail.com",
-                              style: TextStyle(color: Colors.grey),
-                            ),
+                            Text("abc@gmail.com",
+                                style: TextStyle(color: Colors.grey)),
                           ],
                         ),
                       ),
-                      Icon(color: Colors.black87, CupertinoIcons.pencil),
+                      const Icon(CupertinoIcons.pencil,
+                          color: Colors.black87),
                     ],
                   ),
                 ),
               ),
             ),
 
-
             const SizedBox(height: 10),
 
-            // List items
-
-
-            _menuTile(
-              icon: CupertinoIcons.phone,
-              title: "Phone",
-              subtitle: "1234567890",
-              onTap: () {},
-            ),
+            /// MENU ITEMS
             _menuTile(
               icon: CupertinoIcons.home,
-              title: "Address",
+              title: "My Address",
               subtitle: "123, Flutter Lane, Dart Ville",
               onTap: () {},
             ),
@@ -127,19 +122,75 @@ class ProfilePage extends StatelessWidget {
               icon: CupertinoIcons.bell,
               title: "Notification",
               subtitle: "All Notification",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationPage(),
+                  ),
+                );
+              },
             ),
+
+            _menuTile(
+              icon: CupertinoIcons.cube_box,
+              title: "My Orders",
+              subtitle: "All Order here",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MyOrderPage(),
+                  ),
+                );
+              },
+            ),
+
             _menuTile(
               icon: CupertinoIcons.bookmark,
-              title: "Saved Items",
+              title: "Saved",
               subtitle: "Saved items here",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SavedItemsPage(),
+                  ),
+                );
+              },
             ),
+
+            _menuTile(
+              icon: CupertinoIcons.info,
+              title: "About Us",
+              subtitle: "All details here",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AboutUs(),
+                  ),
+                );
+              },
+            ),
+
+            _menuTile(
+              icon: CupertinoIcons.mail,
+              title: "Contact Us",
+              subtitle: "Contact details",
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder:
+                    (context)=> const ContactUs()));
+              },
+            ),
+
             _menuTile(
               icon: CupertinoIcons.square_arrow_left,
               title: "Logout",
-              subtitle: "",
-              onTap: () {},
+              subtitle: "Tap to logout",
+              onTap: () {
+                _showLogoutDialog(context);
+              },
             ),
 
             const SizedBox(height: 90),
@@ -149,6 +200,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  /// MENU TILE
   static Widget _menuTile({
     required IconData icon,
     required String title,
@@ -172,21 +224,99 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  static Widget _bottomItem(IconData icon, String label, bool active) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: active ? const Color(0xFFFF6A00) : Colors.grey),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: active ? const Color(0xFFFF6A00) : Colors.grey,
+  static void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        )
-      ],
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 70,
+                  width: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.square_arrow_left,
+                    color: Colors.blue,
+                    size: 36,
+                  ),
+
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Logout",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Are you sure you want to logout from your account?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                              const HomePage(selectedIndex: 0, mobileNumber: null,),
+                            ),
+                                (route) => false,
+                          );
+                        },
+                        child: const Text(
+                          "Logout",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
-

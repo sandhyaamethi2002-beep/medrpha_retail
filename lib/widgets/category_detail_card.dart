@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../Product_Categories/product_detail_page.dart';
 import '../Provider/cart_provider.dart';
-
+import '../Provider/wishlist_provider.dart';
 
 class CategoryDetailCard extends StatelessWidget {
   final String imageUrl;
@@ -21,21 +21,24 @@ class CategoryDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartProvider>(
-      builder: (context, cartProvider, child) {
-        // Check if item is already in cart
+    return Consumer2<CartProvider, WishlistProvider>(
+      builder: (context, cartProvider, wishlistProvider, child) {
+        // Cart logic
         final cartItemIndex = cartProvider.cartList
             .indexWhere((item) => item.productName == productsname);
         final bool isInCart = cartItemIndex != -1;
-        final int qty = isInCart ? cartProvider.cartList[cartItemIndex].qty : 0;
+        final int qty =
+        isInCart ? cartProvider.cartList[cartItemIndex].qty : 0;
+
+        // Wishlist logic
+        final bool isSaved = wishlistProvider.isSaved(productsname);
 
         return InkWell(
           onTap: () {
-            // Navigate to Product Detail Page
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProductDetailPage(
+                builder: (_) => ProductDetailPage(
                   productName: productsname,
                   imageUrl: imageUrl,
                   available: available,
@@ -63,7 +66,7 @@ class CategoryDetailCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left Image
+                // Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
@@ -71,12 +74,13 @@ class CategoryDetailCard extends StatelessWidget {
                     height: 72,
                     width: 72,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
+                    errorBuilder: (_, __, ___) {
                       return Container(
                         height: 72,
                         width: 72,
                         color: Colors.grey.shade200,
-                        child: const Icon(Icons.image_not_supported),
+                        child:
+                        const Icon(Icons.image_not_supported),
                       );
                     },
                   ),
@@ -84,14 +88,16 @@ class CategoryDetailCard extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                // Right Side Content
+                // Right Content
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
                     children: [
-                      // Top Row -> Product Name + Save Icon
+                      // Name + Save Icon
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
@@ -103,11 +109,24 @@ class CategoryDetailCard extends StatelessWidget {
                             ),
                           ),
                           InkWell(
-                            onTap: () {},
-                            child: const Icon(
-                              Icons.bookmark_border,
+                            onTap: () {
+                              wishlistProvider.toggleWishlist(
+                                WishlistItem(
+                                  productName: productsname,
+                                  imageUrl: imageUrl,
+                                  available: available,
+                                  status: status,
+                                ),
+                              );
+                            },
+                            child: Icon(
+                              isSaved
+                                  ? Icons.bookmark
+                                  : Icons.bookmark_border,
                               size: 22,
-                              color: Colors.grey,
+                              color: isSaved
+                                  ? Colors.blue
+                                  : Colors.grey,
                             ),
                           ),
                         ],
@@ -116,24 +135,17 @@ class CategoryDetailCard extends StatelessWidget {
                       const SizedBox(height: 6),
 
                       // Status
-                      Row(
-                        children: [
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              status,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        status,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
                       ),
 
                       const SizedBox(height: 14),
 
-                      // Bottom Row -> Available + Add/Qty Button
+                      // Bottom Row
                       Row(
                         children: [
                           Expanded(
@@ -151,7 +163,8 @@ class CategoryDetailCard extends StatelessWidget {
                                     text: available,
                                     style: const TextStyle(
                                       fontSize: 13,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight:
+                                      FontWeight.bold,
                                       color: Colors.black,
                                     ),
                                   ),
@@ -160,24 +173,32 @@ class CategoryDetailCard extends StatelessWidget {
                             ),
                           ),
 
-                          // Add / Quantity Buttons
+                          // Add / Qty
                           isInCart
                               ? Container(
                             height: 40,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blue),
-                              borderRadius: BorderRadius.circular(12),
+                            decoration:
+                            BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.blue),
+                              borderRadius:
+                              BorderRadius.circular(
+                                  12),
                             ),
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisSize:
+                              MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.remove,
-                                      color: Colors.blue),
+                                  icon: const Icon(
+                                      Icons.remove,
+                                      color:
+                                      Colors.blue),
                                   onPressed: () {
                                     if (qty > 1) {
                                       cartProvider
-                                          .decreaseQty(productsname);
+                                          .decreaseQty(
+                                          productsname);
                                     } else {
                                       cartProvider
                                           .removeFromCartByName(
@@ -189,14 +210,19 @@ class CategoryDetailCard extends StatelessWidget {
                                   '$qty',
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight:
+                                    FontWeight.bold,
                                   ),
                                 ),
                                 IconButton(
-                                  icon:
-                                  const Icon(Icons.add, color: Colors.blue),
+                                  icon: const Icon(
+                                      Icons.add,
+                                      color:
+                                      Colors.blue),
                                   onPressed: () {
-                                    cartProvider.increaseQty(productsname);
+                                    cartProvider
+                                        .increaseQty(
+                                        productsname);
                                   },
                                 ),
                               ],
@@ -205,20 +231,30 @@ class CategoryDetailCard extends StatelessWidget {
                               : Container(
                             height: 40,
                             width: 95,
-                            decoration: BoxDecoration(
+                            decoration:
+                            BoxDecoration(
                               color: Colors.blue,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius:
+                              BorderRadius.circular(
+                                  12),
                             ),
                             child: TextButton.icon(
                               onPressed: () {
                                 cartProvider.addToCart(
-                                    productsname, imageUrl, available);
+                                  productsname,
+                                  imageUrl,
+                                  available,
+                                );
                               },
-                              icon: const Icon(Icons.add,
-                                  color: Colors.white, size: 18),
+                              icon: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 18),
                               label: const Text(
                                 "Add",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                    color:
+                                    Colors.white),
                               ),
                             ),
                           ),

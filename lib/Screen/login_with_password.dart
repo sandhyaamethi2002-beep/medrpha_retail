@@ -38,7 +38,7 @@ class _LoginWithPasswordState extends State<LoginWithPassword> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomePage(selectedIndex: 0)),
+      MaterialPageRoute(builder: (context) => const HomePage(selectedIndex: 0, mobileNumber: null,)),
     );
 
     String otp = generateOtp();

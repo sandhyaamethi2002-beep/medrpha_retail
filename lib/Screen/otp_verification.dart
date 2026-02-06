@@ -109,7 +109,7 @@ class _OtpVerificationState extends State<OtpVerification> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomePage(selectedIndex: 0)),
+      MaterialPageRoute(builder: (_) =>  HomePage (mobileNumber: widget.mobileNumber, selectedIndex: 0,)),
     );
   }
 

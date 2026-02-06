@@ -2,17 +2,27 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:medrpha/widgets/terms_condition_page.dart';
 import '../Controllers/register_user_controller.dart';
 import 'drop_downWidgets.dart';
+import 'package:country_picker/country_picker.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/gestures.dart';
+
 
 class RegisterUser extends StatefulWidget {
-  const RegisterUser({super.key});
+  final String? mobileNumber;
+
+  const RegisterUser({super.key, this.mobileNumber});
 
   @override
   State<RegisterUser> createState() => _RegisterUserState();
 }
 
 class _RegisterUserState extends State<RegisterUser> {
+  String? selectedCountry;
+  final List<Country> countryList = CountryService().getAll();
+
   final ScrollController myController = ScrollController();
   final _formKey = GlobalKey<FormState>();
   final RegisterUserController controller = RegisterUserController();
@@ -23,7 +33,17 @@ class _RegisterUserState extends State<RegisterUser> {
   String? dlSelected;
   String? fssaiSelected;
 
-  // ✅ Pick DL file
+  @override
+  void initState() {
+    super.initState();
+
+    if(widget.mobileNumber != null &&
+        widget.mobileNumber!.isNotEmpty) {
+      controller.phoneController.text = widget.mobileNumber!;
+    }
+  }
+
+  //  Pick DL file
   Future<void> pickDLFile({required bool isDL1}) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -153,6 +173,7 @@ class _RegisterUserState extends State<RegisterUser> {
                     controller.phoneController,
                     icon: CupertinoIcons.phone,
                     keyboardType: TextInputType.phone,
+                    readOnly: true,
                   ),
                   const SizedBox(height: 15),
 
@@ -229,7 +250,7 @@ class _RegisterUserState extends State<RegisterUser> {
                       ),
                       const SizedBox(height: 15),
 
-                      // ✅ DL-1 File Upload
+                      //  DL-1 File Upload
                       _fileUploadField(
                         label: "DL-1 *",
                         textController: controller.dl1Controller,
@@ -240,7 +261,7 @@ class _RegisterUserState extends State<RegisterUser> {
 
                       const SizedBox(height: 15),
 
-                      // ✅ DL-2 File Upload
+                      //  DL-2 File Upload
                       _fileUploadField(
                         label: "DL-2 *",
                         textController: controller.dl2Controller,
@@ -294,20 +315,70 @@ class _RegisterUserState extends State<RegisterUser> {
 
                   const SizedBox(height: 15),
 
-                  _customTextField(
-                    "Country *",
-                    controller.countryController,
-                    icon: CupertinoIcons.globe,
-                    readOnly: true,
-                    isRequired: true,
+                  // _customTextField(
+                  //   "Country *",
+                  //   controller.countryController,
+                  //   icon: CupertinoIcons.globe,
+                  //   readOnly: true,
+                  //   isRequired: true,
+                  // ),
+
+                  DropdownSearch<Country>(
+                    items: countryList,
+                    itemAsString: (Country c) => "${c.flagEmoji} ${c.name}",
+                    selectedItem: selectedCountry != null
+                        ? countryList.firstWhere(
+                          (c) => c.name == selectedCountry,
+                    )
+                        : null,
+                    popupProps: const PopupProps.menu(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        decoration: InputDecoration(
+                          hintText: "Search country...",
+                        ),
+                      ),
+                    ),
+                    dropdownDecoratorProps: DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: "Country *",
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        prefixIcon: const Icon(
+                          CupertinoIcons.globe,
+                          size: 20,
+                          color: Colors.blue,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.grey, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.blue, width: 2),
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null) {
+                        return "Country is required";
+                      }
+                      return null;
+                    },
+                    onChanged: (Country? country) {
+                      setState(() {
+                        selectedCountry = country?.name;
+                        controller.countryController.text = country?.name ?? "";
+                      });
+                    },
                   ),
+
                   const SizedBox(height: 15),
 
                   _customTextField(
                     "State *",
                     controller.stateController,
                     icon: CupertinoIcons.map_pin_ellipse,
-                    readOnly: true,
                     isRequired: true,
                   ),
                   const SizedBox(height: 15),
@@ -316,7 +387,6 @@ class _RegisterUserState extends State<RegisterUser> {
                     "Select City *",
                     controller.cityController,
                     icon: CupertinoIcons.location_solid,
-                    readOnly: true,
                     isRequired: true,
                   ),
                   const SizedBox(height: 15),
@@ -372,10 +442,34 @@ class _RegisterUserState extends State<RegisterUser> {
                   const SizedBox(height: 20),
 
                   CheckboxListTile(
-                    title: const Text(
-                      "I agree with Terms and Conditions",
-                      style: TextStyle(fontSize: 14),
+                    title: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                        children: [
+                          const TextSpan(text: "I agree with "),
+                          TextSpan(
+                            text: "Terms and Conditions",
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const TermsConditionPage(),
+                                  ),
+                                );
+                              },
+                          ),
+                        ],
+                      ),
                     ),
+
                     value: controller.isChecked,
                     onChanged: (val) {
                       setState(() {
