@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:medrpha/Screen/order_detail_page.dart';
 import 'package:provider/provider.dart';
 import '../Provider/cart_provider.dart';
 
@@ -29,8 +30,6 @@ class _OrderPageState extends State<MyOrderPage> {
         builder: (context, provider, child) {
           return Column(
             children: [
-
-              /// 🔍 SEARCH + FILTER (UNCHANGED)
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
@@ -83,12 +82,17 @@ class _OrderPageState extends State<MyOrderPage> {
                     final item = provider.cartList[index];
 
                     return Card(
+                      color: Colors.white,
                       margin: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ListTile(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>
+                          const OrderDetails()));
+                        },
                         leading: Container(
                           height: 50,
                           width: 50,

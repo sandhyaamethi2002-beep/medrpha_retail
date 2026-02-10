@@ -4,6 +4,7 @@ import 'package:medrpha/Screen/about_us.dart';
 import 'package:medrpha/Screen/home_page.dart';
 import 'package:medrpha/Screen/saved_item_page.dart';
 import 'contact_us.dart';
+import 'edit_profile_page.dart';
 import 'my_order_page.dart';
 import 'notification_page.dart';
 
@@ -101,8 +102,19 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(CupertinoIcons.pencil,
-                          color: Colors.black87),
+                      // const Icon(CupertinoIcons.pencil,
+                      //     color: Colors.black87),
+
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.pencil, color: Colors.black87),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => EditProfilePage(mobileNumber: mobileNumber),
+                              )
+                              );
+                        }
+                      )
                     ],
                   ),
                 ),
@@ -272,6 +284,8 @@ class ProfilePage extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
