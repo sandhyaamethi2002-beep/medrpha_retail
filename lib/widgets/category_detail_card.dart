@@ -10,6 +10,8 @@ class CategoryDetailCard extends StatelessWidget {
   final String productsname;
   final String status;
   final String available;
+  final double price;
+
 
   const CategoryDetailCard({
     super.key,
@@ -17,6 +19,7 @@ class CategoryDetailCard extends StatelessWidget {
     required this.productsname,
     required this.status,
     required this.available,
+    required this.price,
   });
 
   @override
@@ -43,6 +46,7 @@ class CategoryDetailCard extends StatelessWidget {
                   imageUrl: imageUrl,
                   available: available,
                   status: status,
+                  price: price,
                 ),
               ),
             );
@@ -116,6 +120,7 @@ class CategoryDetailCard extends StatelessWidget {
                                   imageUrl: imageUrl,
                                   available: available,
                                   status: status,
+                                  price: price,
                                 ),
                               );
                             },
@@ -244,6 +249,7 @@ class CategoryDetailCard extends StatelessWidget {
                                   productsname,
                                   imageUrl,
                                   available,
+                                  price,
                                 );
                               },
                               icon: const Icon(

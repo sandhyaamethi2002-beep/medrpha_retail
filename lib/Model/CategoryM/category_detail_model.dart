@@ -113,6 +113,8 @@ class CategoryDetailProductModel {
     );
   }
 
+  get price => null;
+
   Map<String, dynamic> toJson() {
     return {
       "pid": pid,

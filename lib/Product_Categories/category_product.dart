@@ -7,7 +7,11 @@ class CategoryProduct extends StatefulWidget {
   final String title;
   final int categoryId;
 
-  const CategoryProduct({super.key, required this.title, required this.categoryId});
+  const CategoryProduct({
+    super.key,
+    required this.title,
+    required this.categoryId,
+  });
 
   @override
   State<CategoryProduct> createState() => _CategoryProductState();
@@ -18,13 +22,13 @@ class _CategoryProductState extends State<CategoryProduct> {
   void initState() {
     super.initState();
 
-    // Fetch category details when widget is initialized
     Future.microtask(() {
-      context.read<CategoryDetailViewModel>().fetchCategoryDetail(widget.categoryId);
+      context
+          .read<CategoryDetailViewModel>()
+          .fetchCategoryDetail(widget.categoryId);
     });
   }
 
-  // Get image URL safely
   String _getImageUrl(String? productImg) {
     if (productImg == null || productImg.isEmpty) {
       return "https://via.placeholder.com/150";
@@ -33,10 +37,9 @@ class _CategoryProductState extends State<CategoryProduct> {
     return "https://yourdomain.com/uploads/$productImg";
   }
 
-  // Clean description to remove cut icon or unwanted characters
   String _cleanDescription(String? description) {
     if (description == null) return "";
-    return description.replaceAll('✂️', '').trim(); // remove cut icon
+    return description.replaceAll('✂️', '').trim();
   }
 
   @override
@@ -83,8 +86,9 @@ class _CategoryProductState extends State<CategoryProduct> {
               return CategoryDetailCard(
                 imageUrl: _getImageUrl(item.productImg),
                 productsname: item.productName ?? "",
-                status: _cleanDescription(item.description), // cleaned description
+                status: _cleanDescription(item.description),
                 available: item.categoryName ?? "",
+                price: item.price ?? 0.0,   // ✅ Correct price passing
               );
             },
           );

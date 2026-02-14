@@ -5,12 +5,14 @@ class CartItem {
   final String productName;
   final String imageUrl;
   final String available;
+  final double price;
   int qty; // Quantity of the product
 
   CartItem({
     required this.productName,
     required this.imageUrl,
     required this.available,
+    required this.price,
     this.qty = 1,
   });
 }
@@ -21,17 +23,24 @@ class CartProvider with ChangeNotifier {
   List<CartItem> cartList = [];
 
   /// Add an item to cart
-  void addToCart(String productName, String imageUrl, String available) {
+  void addToCart(
+      String productName,
+      String imageUrl,
+      String available,
+      double price,
+      ) {
     int index = cartList.indexWhere((item) => item.productName == productName);
     if (index != -1) {
       // If already in cart, increase quantity
       cartList[index].qty += 1;
     } else {
       // If not in cart, add new item
-      cartList.add(CartItem(
+      cartList.add(
+      CartItem(
         productName: productName,
         imageUrl: imageUrl,
         available: available,
+        price: price,
         qty: 1,
       ));
     }
@@ -40,11 +49,11 @@ class CartProvider with ChangeNotifier {
 
   /// Remove an item from cart by index
   void removeFromCart(int index) {
-    if (index >= 0 && index < cartList.length) {
+    // if (index >= 0 && index < cartList.length) {
       cartList.removeAt(index);
       notifyListeners();
     }
-  }
+  // }
 
   /// Remove an item from cart by product name
   void removeFromCartByName(String productName) {
@@ -54,7 +63,8 @@ class CartProvider with ChangeNotifier {
 
   /// Increase quantity of an item
   void increaseQty(String productName) {
-    int index = cartList.indexWhere((item) => item.productName == productName);
+    int index =
+        cartList.indexWhere((item) => item.productName == productName);
     if (index != -1) {
       cartList[index].qty += 1;
       notifyListeners();
@@ -64,7 +74,8 @@ class CartProvider with ChangeNotifier {
   /// Decrease quantity of an item
   /// If qty reaches 0, remove the item
   void decreaseQty(String productName) {
-    int index = cartList.indexWhere((item) => item.productName == productName);
+    int index =
+        cartList.indexWhere((item) => item.productName == productName);
     if (index != -1) {
       if (cartList[index].qty > 1) {
         cartList[index].qty -= 1;
@@ -81,12 +92,32 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Get total number of items in cart
-  int get totalItems {
-    int total = 0;
+  // Billing Calculation
+
+  double get itemTotal {
+    double total = 0;
     for (var item in cartList) {
-      total += item.qty;
-    }
+      total += item.price * item.qty;
+  }
     return total;
   }
+
+  double get deliveryFee {
+    return itemTotal > 80 ? 0 : 30;
+  }
+
+  double get handlingFee => 20;
+
+  double get gst => itemTotal * 0.05;
+
+  double get totalPay => itemTotal + deliveryFee + handlingFee + gst;
+
+  /// Get total number of items in cart
+  // int get totalItems {
+  //   int total = 0;
+  //   for (var item in cartList) {
+  //     total += item.qty;
+  //   }
+  //   return total;
+  // }
 }

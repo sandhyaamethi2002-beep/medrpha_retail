@@ -145,12 +145,11 @@ class _CountryStateCityWidgetState extends State<CountryStateCityWidget> {
       dropdownSearchDecoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: Colors.white,
         prefixIcon: Icon(icon, size: 20, color: Colors.blue),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-          const BorderSide(color: Colors.grey, width: 1.5),
+            borderSide: BorderSide(color: Colors.grey.shade600, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

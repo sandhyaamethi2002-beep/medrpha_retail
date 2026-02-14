@@ -7,6 +7,7 @@ class ProductDetailPage extends StatelessWidget {
   final String imageUrl;
   final String available;
   final String status;
+  final double price;
 
   const ProductDetailPage({
     super.key,
@@ -14,6 +15,7 @@ class ProductDetailPage extends StatelessWidget {
     required this.imageUrl,
     required this.available,
     required this.status,
+    required this.price
   });
 
   @override
@@ -141,16 +143,16 @@ class ProductDetailPage extends StatelessWidget {
                       /// SELLING PRICE + DISCOUNT
                       ///
                       Row(
-                        children: const [
+                        children: [
                           Text(
-                            "₹ 1,999",
-                            style: TextStyle(
+                            "₹ ${price.toStringAsFixed(0)}",
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Text(
+                          const SizedBox(width: 10),
+                          const Text(
                             "20% OFF",
                             style: TextStyle(
                               color: Colors.green,
@@ -226,7 +228,7 @@ class ProductDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () {
-                      cartProvider.addToCart(productName, imageUrl, available);
+                      cartProvider.addToCart(productName, imageUrl, available, price,);
                     },
 
                     label: const Text(

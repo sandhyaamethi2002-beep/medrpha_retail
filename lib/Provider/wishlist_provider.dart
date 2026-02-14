@@ -5,12 +5,14 @@ class WishlistItem {
   final String imageUrl;
   final String available;
   final String status;
+  final double price;
 
   WishlistItem({
     required this.productName,
     required this.imageUrl,
     required this.available,
     required this.status,
+    required this.price,
   });
 }
 

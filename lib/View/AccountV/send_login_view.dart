@@ -51,15 +51,7 @@ class _SendLoginViewState extends State<SendLoginView> {
                         width: 130,
                       ),
 
-                      const SizedBox(height: 25),
-
-                      const Text(
-                        "Enter Mobile Number",
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
-
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 20),
 
                       const Text(
                         "Enter your 10-digit mobile number to receive the verification code.",
@@ -107,18 +99,18 @@ class _SendLoginViewState extends State<SendLoginView> {
                         height: 48,
                         child: ElevatedButton(
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LoginWithPassword(
-                                    // mobileNumber: mobileController.text.trim(),
-                                    // otp: vm?.responseModel?.otp ?? "",
-                                  ),
+                            // if (_formKey.currentState!.validate()) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginWithPassword(
+                                  // mobileNumber: mobileController.text.trim(),
+                                  // otp: vm?.responseModel?.otp ?? "",
                                 ),
-                              );
+                              ),
+                            );
 
-                            }
+                            // }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,

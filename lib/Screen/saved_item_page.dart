@@ -130,6 +130,7 @@ class SavedItemsPage extends StatelessWidget {
                                 item.productName,
                                 item.imageUrl,
                                 item.status,
+                                item.price,
                               );
 
                               /// REMOVE FROM SAVED
