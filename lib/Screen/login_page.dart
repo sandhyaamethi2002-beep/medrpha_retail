@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import 'login_with_password.dart';
-import 'otp_verification.dart';
+import 'package:medrpha/Screen/login_with_password.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../Screen/otp_verification.dart';
+import '../../ViewModel/AccountVM/send_login_view_model.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+
+class SendLoginView extends StatefulWidget {
+  const SendLoginView({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SendLoginView> createState() => _SendLoginViewState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SendLoginViewState extends State<SendLoginView> {
   final TextEditingController mobileController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -19,152 +23,210 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> saveLoginData(String mobile, String otp) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    bool mobileSaved = await prefs.setString('mobile_number', mobile);
+    bool otpSaved = await prefs.setString('otp', otp);
+
+    //  Debug prints
+    print("Mobile saved successfully: $mobileSaved");
+    print("OTP saved successfully: $otpSaved");
+
+    print("Saved Mobile from Local: ${prefs.getString('mobile_number')}");
+    print("Saved OTP from Local: ${prefs.getString('otp')}");
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(size.width * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: size.height * 0.02),
+    return ChangeNotifierProvider(
+      create: (_) => SendLoginViewModel(),
+      child: Consumer<SendLoginViewModel>(
+        builder: (context, vm, child) {
+          return Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(),
+            body: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.all(size.width * 0.05),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: size.height * 0.02),
 
-              Image.asset(
-                'assets/images/img.png',
-                height: 130,
-                width: 130,
-              ),
+                      Image.asset(
+                        'assets/images/img.png',
+                        height: 130,
+                        width: 130,
+                      ),
 
-              const SizedBox(height: 25),
+                      const SizedBox(height: 20),
 
-              const Text(
-                "Enter Mobile Number",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
+                      const Text(
+                        "Enter your 10-digit mobile number to receive the verification code.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
 
-              const SizedBox(height: 10),
+                      const SizedBox(height: 30),
 
-              const Text(
-                "Enter your 10-digit mobile number to receive the verification code.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-
-              const SizedBox(height: 30),
-
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Mobile Number",
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              // FORM SIRF YAHAN SE START
-              Form(
-                key: _formKey,
-                child: TextFormField(
-                  controller: mobileController,
-                  keyboardType: TextInputType.phone,
-                  maxLength: 10,
-                  decoration: InputDecoration(
-                    hintText: "Enter Mobile Number",
-                    counterText: "",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter mobile number";
-                    } else if (value.length != 10) {
-                      return "Please enter 10 digit mobile number";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    FocusScope.of(context).unfocus();
-
-                    String mobile = mobileController.text.trim();
-
-                    if (mobile.isEmpty) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginWithPassword(),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Mobile Number",
+                          style: TextStyle(fontWeight: FontWeight.w500),
                         ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                    child: const Text(
-                      "Login With Password",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    )
-                ),
-              ),
+                      ),
 
+                      const SizedBox(height: 8),
 
-
-
-              const SizedBox(height: 20),
-
-              // OTP BUTTON (VALIDATION REQUIRED)
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OtpVerification(
-                            mobileNumber: mobileController.text.trim(),
-                            otp: '',
+                      TextFormField(
+                        controller: mobileController,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        decoration: InputDecoration(
+                          hintText: "Enter Mobile Number",
+                          counterText: "",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "Get Verification Code (OTP)",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter mobile number";
+                          } else if (value.length != 10) {
+                            return "Please enter 10 digit mobile number";
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginWithPassword(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            "Login With Password",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: vm.isLoading
+                              ? null
+                              : () async {
+                            if (_formKey.currentState!.validate()) {
+                              final ok = await vm.sendOtp(
+                                mobileController.text.trim(),
+                              );
+
+                              if (ok) {
+                                // save in local storage
+                                await saveLoginData(
+                                  mobileController.text.trim(),
+                                  vm.responseModel?.otp ?? "",
+                                );
+
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      vm.responseModel?.message ??
+                                          "OTP Sent",
+                                    ),
+                                  ),
+                                );
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        OtpVerification(
+                                          mobileNumber:
+                                          mobileController.text.trim(),
+                                          otp: vm.responseModel?.otp ?? "",
+                                        ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      vm.errorMessage.isNotEmpty
+                                          ? vm.errorMessage
+                                          : "OTP failed",
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: vm!.isLoading
+                              ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                              : const Text(
+                            "Get Verification Code (OTP)",
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 }
+
+// extension on Object? {
+//   get responseModel => null;
+//
+//   bool? get isLoading => null;
+// }

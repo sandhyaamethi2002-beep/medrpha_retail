@@ -1,144 +1,243 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
+import '../Model/RegistrationM/country_model.dart';
+import '../Model/RegistrationM/register_model.dart';
+import '../Model/RegistrationM/state_model.dart';
+import '../Model/RegistrationM/city_model.dart';
+import '../Model/RegistrationM/pincode_model.dart';
+import '../ViewModel/RegistrationVM/pincode_view_model.dart';
+import '../ViewModel/RegistrationVM/register_view_model.dart';
 
 class RegisterController extends GetxController {
-  // --- Step Tracker ---
-  var currentStep = 0.obs;
-  var isAgreed = false.obs;
-  var isLoading = false.obs; // API call ke waqt loading dikhane ke liye
 
-  // --- STEP 1: Personal Details ---
+  // ================= STEP =================
+  RxInt currentStep = 0.obs;
+
+  void nextStep() {
+    if (currentStep.value < 3) currentStep.value++;
+  }
+
+  void previousStep() {
+    if (currentStep.value > 0) currentStep.value--;
+  }
+
+  // ================= TEXT CONTROLLERS =================
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // --- STEP 2: Firm Details ---
-  final firmNameController = TextEditingController();
-
-  // GST Section
-  var hasGST = "Yes".obs;
   final gstNoController = TextEditingController();
-
-  // Drug Licence Section
-  var hasDrugLicence = "Yes".obs;
   final drugLicenceNameController = TextEditingController();
   final drugLicenceNoController = TextEditingController();
+  final validUptoController = TextEditingController();
+  final fssaiNoController = TextEditingController();
+
   final dl1Controller = TextEditingController();
   final dl2Controller = TextEditingController();
-  final validUptoController = TextEditingController();
-
-  // FSSAI Section
-  var hasFSSAI = "Yes".obs;
-  final fssaiNoController = TextEditingController();
   final fssaiImageController = TextEditingController();
 
-  // --- File Names (for showing after upload) ---
-  var dl1FileName = "".obs;
-  var dl2FileName = "".obs;
-  var fssaiFileName = "".obs;
-
-
-  // --- STEP 3: Address Details ---
-  final countryController = TextEditingController();
-  final stateController = TextEditingController();
-  final cityController = TextEditingController();
-  final pinCodeController = TextEditingController();
   final addressController = TextEditingController();
+  final pinCodeController = TextEditingController();
 
-  // --- STEP 4: Other Details ---
   final contactPersonNameController = TextEditingController();
   final contactNumberController = TextEditingController();
   final alternateNumberController = TextEditingController();
 
-  Future<void> pickFile(
-      TextEditingController controller,
-      RxString fileNameVar,
-      ) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg','jpeg','png','pdf'],
-    );
+  // ================= FILE NAMES =================
+  RxString dl1FileName = "".obs;
+  RxString dl2FileName = "".obs;
+  RxString fssaiFileName = "".obs;
 
-    if (result != null) {
-      fileNameVar.value = result.files.single.name;
-      controller.text = result.files.single.path ?? "";
-    }
+  // ================= FLAGS =================
+  RxString hasGST = "No".obs;
+  RxString hasDrugLicence = "No".obs;
+  RxString hasFSSAI = "No".obs;
+  RxBool isAgreed = false.obs;
+
+  // ================= DROPDOWNS =================
+  RxList<Country> countryList = <Country>[].obs;
+  RxList<StateModel> stateList = <StateModel>[].obs;
+  RxList<CityModel> cityList = <CityModel>[].obs;
+
+  Rx<Country?> selectedCountry = Rx<Country?>(null);
+  Rx<StateModel?> selectedState = Rx<StateModel?>(null);
+  Rx<CityModel?> selectedCity = Rx<CityModel?>(null);
+
+  RxBool isCountryLoading = false.obs;
+  RxBool isStateLoading = false.obs;
+  RxBool isCityLoading = false.obs;
+
+  // ================= VIEWMODELS =================
+  final PincodeViewModel pincodeVM = Get.put(PincodeViewModel());
+  final RegisterViewModel viewModel = Get.put(RegisterViewModel());
+
+  // ================= INIT =================
+  @override
+  void onInit() {
+    super.onInit();
+    loadCountries();
   }
 
-  // --- Navigation Logic ---
-  void nextStep() {
-    if (currentStep.value < 3) {
-      currentStep.value++;
-    }
-  }
-
-  void previousStep() {
-    if (currentStep.value > 0) {
-      currentStep.value--;
-    }
-  }
-
-  // --- Final Submission Logic ---
-  Future<void> submitRegistration() async {
-    // 1. Check if Terms are agreed
-    if (!isAgreed.value) {
-      Get.snackbar("Terms Required", "Please accept terms and conditions",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange.withOpacity(0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-        borderRadius: 10,
-        duration: const Duration(seconds: 3),
-        isDismissible: true,
-        forwardAnimationCurve: Curves.easeOutBack,
-      );
-      return;
-    }
-
-    // 2. Start Loading
-    isLoading.value = true;
-
+  // ================= COUNTRY =================
+  Future<void> loadCountries() async {
     try {
-      print("Sending Data to Server...");
-      print("Name: ${nameController.text}");
-      print("Email: ${emailController.text}");
+      isCountryLoading.value = true;
+      final data = await viewModel.getCountries();
+      countryList.assignAll(data);
+    } catch (e) {
+      Get.snackbar("Error", "Failed to load countries");
+    } finally {
+      isCountryLoading.value = false;
+    }
+  }
 
+  void onCountrySelected(Country? value) {
+    selectedCountry.value = value;
 
-      await Future.delayed(const Duration(seconds: 2));
+    if (value != null) {
+      loadStates(value.countryId);
+    }
+  }
 
-      Get.snackbar("Success", "Registration Completed Successfully!",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white);
+  // ================= STATE =================
+  Future<void> loadStates(int countryId) async {
+    try {
+      isStateLoading.value = true;
 
+      final data = await viewModel.getStates(countryId);
+
+      print("Controller stateList length: ${data.length}");
+
+      stateList.assignAll(data);
+
+      selectedState.value = null;
+      cityList.clear();
 
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong. Please try again.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      print("LoadStates ERROR: $e");
+      Get.snackbar("Error", "Failed to load states");
     } finally {
-      isLoading.value = false;
+      isStateLoading.value = false;
     }
   }
 
+  void onStateSelected(StateModel? value) {
+    selectedState.value = value;
+
+    if (value != null) {
+      loadCities(value.stateId);
+    }
+  }
+  // ================= CITY =================
+  Future<void> loadCities(int stateId) async {
+    try {
+      isCityLoading.value = true;
+      final data = await viewModel.getCities(stateId);
+      cityList.assignAll(data);
+
+      selectedCity.value = null;
+    } catch (e) {
+      Get.snackbar("Error", "Failed to load cities");
+    } finally {
+      isCityLoading.value = false;
+    }
+  }
+
+  void onCitySelected(CityModel? city) {
+    selectedCity.value = city;
+
+    pinCodeController.text = "";
+    pincodeVM.selectedPincode.value = null;
+    pincodeVM.pincodeList.clear();
+
+    if(city != null){
+      pincodeVM.fetchPincode(city.cityId);
+    }
+  }
+
+  // ================= FILE PICKER =================
+  Future<void> pickFile(
+      TextEditingController controller,
+      RxString fileName,
+      ) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      controller.text = result.files.single.path ?? "";
+      fileName.value = result.files.single.name;
+    }
+  }
+
+  // ================= SUBMIT =================
+  Future<void> submitRegistration() async {
+
+    final model = RegisterRequestModel(
+      userTypeId: 979394,
+      firmName: nameController.text.trim(),
+      gstNo: gstNoController.text.trim(),
+      valid: DateTime.now().toIso8601String(),
+      phoneNo: phoneController.text.trim(),
+      dl1: dl1Controller.text,
+      dl2: dl2Controller.text,
+      pic3: fssaiImageController.text,
+      address: addressController.text.trim(),
+      registerDate: DateTime.now().toIso8601String(),
+      payLateStatus: 1,
+      email: emailController.text.trim(),
+      postalCode: pinCodeController.text.trim(),
+      dlNo: drugLicenceNoController.text.trim(),
+      adminId: 6798,
+      completeRegStatus: 1,
+      countryId: selectedCountry.value?.countryId ?? 1,
+      stateId: selectedState.value?.stateId ?? 1,
+      cityId: selectedCity.value?.cityId ?? 1,
+      regionalId: 1,
+      areaId: pincodeVM.selectedPincode.value?.areaid ?? 1,
+      status: 1,
+      dlName: drugLicenceNameController.text.trim(),
+      fssaiNo: fssaiNoController.text.trim(),
+      personName: contactPersonNameController.text.trim(),
+      personNumber: contactNumberController.text.trim(),
+      alternateNumber: alternateNumberController.text.trim(),
+      hdnDrugYesNo: hasDrugLicence.value == "Yes" ? 1 : 0,
+      hdnFSSAI: hasFSSAI.value == "Yes" ? 1 : 0,
+      gstNoYesNo: hasGST.value == "Yes" ? 1 : 0,
+      mrid: 0,
+      terms: isAgreed.value ? "1" : "0",
+      firmPassword: passwordController.text.trim(),
+      appStatus: 0,
+      salePid: 0,
+      salesExecutiveId: 0,
+    );
+
+    bool success = await viewModel.register(model);
+
+    if (success) {
+      Get.snackbar(
+        "Success",
+        "Firm added successfully",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } else {
+      Get.snackbar(
+        "Error",
+        "Registration Failed",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  // ================= DISPOSE =================
   @override
   void onClose() {
-    final allControllers = [
-      nameController, phoneController, emailController, passwordController,
-      firmNameController, gstNoController, drugLicenceNameController,
-      drugLicenceNoController, dl1Controller, dl2Controller,
-      validUptoController, fssaiNoController, fssaiImageController,
-      countryController, stateController, cityController,
-      pinCodeController, addressController, contactPersonNameController,
-      contactNumberController, alternateNumberController
-    ];
-
-    for (var controller in allControllers) {
-      controller.dispose();
-    }
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 }

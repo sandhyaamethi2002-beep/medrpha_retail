@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class YesNoDropdown extends StatelessWidget {
+  final String label;
+  final RxString selectedValue;
+  final List<Widget> children;
+  final IconData icon;
+
+  const YesNoDropdown({
+    super.key,
+    required this.label,
+    required this.selectedValue,
+    required this.children,
+    required this.icon, required Function() onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() => Column(
+      children: [
+        DropdownButtonFormField<String>(
+          value: selectedValue.value,
+          isExpanded: true,
+          style: const TextStyle(color: Colors.black, fontSize: 15),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+            prefixIcon: Icon(icon, color: Colors.blue.shade400, size: 22),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade600, width: 1.5),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue, width: 1.5),
+            ),
+          ),
+          items: ["Yes", "No"]
+              .map((val) => DropdownMenuItem<String>(
+            value: val,
+            // Yahan se 'const' hata diya gaya hai kyunki 'val' dynamic hai
+            child: Text(
+              val,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ))
+              .toList(),
+          onChanged: (val) {
+            if (val != null) selectedValue.value = val;
+          },
+        ),
+
+        // "Yes" hone par children dikhenge
+        if (selectedValue.value == "Yes")
+          Padding(
+            padding: const EdgeInsets.only(top: 15),
+            child: Column(children: children),
+          ),
+        const SizedBox(height: 18),
+      ],
+    ));
+  }
+}

@@ -46,7 +46,7 @@ class CategoryDetailCard extends StatelessWidget {
                   imageUrl: imageUrl,
                   available: available,
                   status: status,
-                  price: price,
+                  price: price, productId: null, productImg: '', companyName: '', description: '', mrp: price + 200, discount: 20, availableQuantity: '',
                 ),
               ),
             );

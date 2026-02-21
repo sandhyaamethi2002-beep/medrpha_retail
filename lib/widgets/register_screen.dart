@@ -4,7 +4,7 @@ import '../Controllers/register_controller.dart';
 import 'Register/step_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final String mobileNumber;
+  final String? mobileNumber;
 
   const RegisterScreen({
     super.key,
@@ -17,14 +17,20 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
 
-  final RegisterController controller = Get.put(RegisterController());
+  late final RegisterController controller;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
 
-    controller.phoneController.text = widget.mobileNumber;
+    if (Get.isRegistered<RegisterController>()) {
+      controller = Get.find<RegisterController>();
+    } else {
+      controller = Get.put(RegisterController());
+    }
+
+    controller.phoneController.text = widget.mobileNumber ?? "";
   }
 
   @override
@@ -32,18 +38,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Registration",
-            style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 20)),
-        titleSpacing: 0,
+        title: const Text(
+          "Registration",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         backgroundColor: Colors.blue,
-        centerTitle: false,
         elevation: 0,
       ),
       body: SafeArea(
@@ -51,40 +58,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
-            child: Column(
-              children: [
-                Row(
-                  children: List.generate(
-                    4,
-                        (index) => _buildTab(
-                        index, ["Personal", "Firm", "Address", "Other"][index]),
+            child: Obx(() {
+              int step = controller.currentStep.value;
+
+              return Column(
+                children: [
+
+                  Row(
+                    children: List.generate(
+                      4,
+                          (index) => _buildTab(
+                        index,
+                        ["Personal", "Firm", "Address", "Other"][index],
+                        step,
+                      ),
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Obx(() {
-                      return Column(
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
                         children: [
-                          _getStepWidget(controller.currentStep.value),
+                          _getStepWidget(step),
                           const SizedBox(height: 25),
-                          _buildNavigationButtons(),
+                          _buildNavigationButtons(step),
                         ],
-                      );
-                    }),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
           ),
         ),
       ),
     );
   }
-
-  // ---------------- STEP WIDGET LOGIC ----------------
 
   Widget _getStepWidget(int step) {
     switch (step) {
@@ -101,51 +112,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // ---------------- TOP TABS ----------------
+  Widget _buildTab(int index, String title, int step) {
+    bool isActive = step == index;
 
-  Widget _buildTab(int index, String title) {
-    return Obx(() {
-      bool isActive = controller.currentStep.value == index;
-
-      return Expanded(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isActive ? Colors.blue : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 10,
-              color: isActive ? Colors.white : Colors.black54,
-              fontWeight: FontWeight.bold,
-            ),
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.blue : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 10,
+            color: isActive ? Colors.white : Colors.black54,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 
-  // ---------------- NAV BUTTONS ----------------
-
-  Widget _buildNavigationButtons() {
+  Widget _buildNavigationButtons(int step) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+
         _navButton(
           "Previous",
-              () => controller.previousStep(),
+          step == 0 ? null : () => controller.previousStep(),
           isPrimary: false,
         ),
 
         _navButton(
-          controller.currentStep.value == 3 ? "Finish" : "Next",
+          step == 3 ? "Finish" : "Next",
               () {
             if (_formKey.currentState!.validate()) {
-              if (controller.currentStep.value == 3) {
+
+              if (step == 3) {
+
                 if (!controller.isAgreed.value) {
                   Get.snackbar(
                     "Terms Required",
@@ -173,26 +181,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
       VoidCallback? onPressed, {
         required bool isPrimary,
       }) {
-    bool isDisabled =
-        !isPrimary && controller.currentStep.value == 0;
+
+    bool isDisabled = onPressed == null;
 
     return SizedBox(
       width: 120,
       height: 45,
       child: ElevatedButton(
-        onPressed: isDisabled ? null : onPressed,
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor:
           isDisabled ? Colors.grey.shade400 : Colors.blue,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8)),
+            borderRadius: BorderRadius.circular(8),
+          ),
           elevation: isDisabled ? 0 : 2,
         ),
         child: Text(
           label,
           style: const TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 15),
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
         ),
       ),
     );

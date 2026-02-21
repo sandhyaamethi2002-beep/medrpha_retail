@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'login_page.dart';
 
 class LogoutDialog extends StatelessWidget {
   final String? mobileNumber;
 
   const LogoutDialog({super.key, this.mobileNumber});
+
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.clear();
+
+    print("SharedPreferences Cleared Successfully");
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const SendLoginView(),
+      ),
+          (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +48,7 @@ class LogoutDialog extends StatelessWidget {
                 size: 36,
               ),
             ),
+
             const SizedBox(height: 16),
 
             const Text(
@@ -83,19 +101,9 @@ class LogoutDialog extends StatelessWidget {
                       padding:
                       const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pop(context);
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HomePage(
-                            mobileNumber: mobileNumber,
-                            selectedIndex: 0,
-                          ),
-                        ),
-                            (route) => false,
-                      );
+                      await _logout(context);
                     },
                     child: const Text(
                       "Logout",

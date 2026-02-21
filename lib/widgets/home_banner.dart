@@ -70,8 +70,7 @@ class HomeBanner extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                        // RegisterUser(mobileNumber: mobileNumber),
-                        RegisterScreen(mobileNumber: mobileNumber),
+                        RegisterScreen(mobileNumber: mobileNumber ?? ""),
                       ),
                     );
                   },
