@@ -94,7 +94,6 @@ class SavedItemsPage extends StatelessWidget {
                       ),
                     ),
 
-
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -131,6 +130,7 @@ class SavedItemsPage extends StatelessWidget {
                                 item.imageUrl,
                                 item.status,
                                 item.price,
+                                item.minQuantity,
                               );
 
                               /// REMOVE FROM SAVED

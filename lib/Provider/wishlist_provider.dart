@@ -6,6 +6,7 @@ class WishlistItem {
   final String available;
   final String status;
   final double price;
+  final int minQuantity;
 
   WishlistItem({
     required this.productName,
@@ -13,6 +14,7 @@ class WishlistItem {
     required this.available,
     required this.status,
     required this.price,
+    required this.minQuantity,
   });
 }
 

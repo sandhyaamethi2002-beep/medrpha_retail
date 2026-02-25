@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../ViewModel/CategoryVM/category_detail_view_model.dart';
+import '../ViewModel/CategoryVM/getproductdetail_view_model.dart';
 import '../widgets/category_detail_card.dart';
 
 class CategoryProduct extends StatefulWidget {
@@ -21,25 +21,15 @@ class _CategoryProductState extends State<CategoryProduct> {
   @override
   void initState() {
     super.initState();
-
     Future.microtask(() {
-      context
-          .read<CategoryDetailViewModel>()
-          .fetchCategoryDetail(widget.categoryId);
+      context.read<GetProductDetailViewModel>().getProducts(widget.categoryId);
     });
   }
 
   String _getImageUrl(String? productImg) {
-    if (productImg == null || productImg.isEmpty) {
-      return "https://via.placeholder.com/150";
-    }
+    if (productImg == null || productImg.isEmpty) return "https://via.placeholder.com/150";
     if (productImg.startsWith("http")) return productImg;
-    return "https://yourdomain.com/uploads/$productImg";
-  }
-
-  String _cleanDescription(String? description) {
-    if (description == null) return "";
-    return description.replaceAll('✂️', '').trim();
+    return "https://retailer.medrpha.com/images/$productImg";
   }
 
   @override
@@ -51,14 +41,12 @@ class _CategoryProductState extends State<CategoryProduct> {
           widget.title,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Consumer<CategoryDetailViewModel>(
+      body: Consumer<GetProductDetailViewModel>(
         builder: (context, vm, child) {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -73,22 +61,25 @@ class _CategoryProductState extends State<CategoryProduct> {
             );
           }
 
-          if (vm.products.isEmpty) {
+          if (vm.productList.isEmpty) {
             return const Center(child: Text("No Products Found"));
           }
 
           return ListView.builder(
             padding: const EdgeInsets.all(12),
-            itemCount: vm.products.length,
+            itemCount: vm.productList.length,
             itemBuilder: (context, index) {
-              final item = vm.products[index];
+              final item = vm.productList[index];
 
               return CategoryDetailCard(
                 imageUrl: _getImageUrl(item.productImg),
-                productsname: item.productName ?? "",
-                status: _cleanDescription(item.description),
-                available: item.categoryName ?? "",
-                price: item.price ?? 0.0,   // ✅ Correct price passing
+                productsname: item.productName,
+                status: item.productType,
+                available: item.companyName,
+                price: item.finalCompanyPrice,
+                minQuantity: item.minOrderQty,
+                productId: item.pid ?? 0,
+                priceId: item.priceId ?? 0,
               );
             },
           );

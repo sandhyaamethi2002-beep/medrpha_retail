@@ -11,6 +11,9 @@ class ProductDetailPage extends StatelessWidget {
   final double price;
   final double discount;
   final String availableQuantity;
+  final int minQuantity;
+  final int productId;
+  final int priceId;
 
   const ProductDetailPage({
     super.key,
@@ -22,16 +25,15 @@ class ProductDetailPage extends StatelessWidget {
     required this.price,
     required this.discount,
     required this.availableQuantity,
-    required String available,
-    required String imageUrl,
-    required String status, required productId,
+    required this.minQuantity,
+    required this.productId,
+    required this.priceId,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-
       appBar: AppBar(
         backgroundColor: Colors.blue,
         centerTitle: true,
@@ -40,7 +42,6 @@ class ProductDetailPage extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
       ),
-
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -48,28 +49,22 @@ class ProductDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-                /// Product Image (Safe)
+                /// Product Image
                 productImg.isNotEmpty
                     ? Image.network(
                   productImg,
                   width: double.infinity,
                   height: 300,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
-                    return _imageErrorWidget();
-                  },
+                  errorBuilder: (_, __, ___) => _imageErrorWidget(),
                 )
                     : _imageErrorWidget(),
-
                 const SizedBox(height: 20),
-
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       Text(
                         productName,
                         style: const TextStyle(
@@ -77,18 +72,12 @@ class ProductDetailPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 6),
-
                       Text(
                         companyName,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                        ),
+                        style: TextStyle(color: Colors.grey.shade600),
                       ),
-
                       const SizedBox(height: 20),
-
                       if (mrp > 0)
                         Text(
                           "₹ ${mrp.toStringAsFixed(0)}",
@@ -98,9 +87,7 @@ class ProductDetailPage extends StatelessWidget {
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
-
                       const SizedBox(height: 5),
-
                       Row(
                         children: [
                           Text(
@@ -121,9 +108,7 @@ class ProductDetailPage extends StatelessWidget {
                             ),
                         ],
                       ),
-
                       const SizedBox(height: 20),
-
                       const Text(
                         "Description",
                         style: TextStyle(
@@ -131,16 +116,12 @@ class ProductDetailPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 6),
-
                       Text(
                         description.isNotEmpty
                             ? description
                             : "No description available",
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
-                        ),
+                        style: TextStyle(color: Colors.grey.shade700),
                       ),
                     ],
                   ),
@@ -156,10 +137,8 @@ class ProductDetailPage extends StatelessWidget {
             right: 20,
             child: Consumer<CartProvider>(
               builder: (context, cartProvider, child) {
-
-                final cartIndex = cartProvider.cartList.indexWhere(
-                      (item) => item.productName == productName,
-                );
+                final cartIndex = cartProvider.cartList
+                    .indexWhere((item) => item.productName == productName);
 
                 final bool isInCart = cartIndex != -1;
                 final int qty =
@@ -201,8 +180,8 @@ class ProductDetailPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.remove),
             onPressed: () {
-              if (qty > 1) {
-                cartProvider.decreaseQty(productName);
+              if (qty > minQuantity) {
+                cartProvider.decreaseQty(productName, minQuantity);
               } else {
                 cartProvider.removeFromCartByName(productName);
               }
@@ -210,9 +189,8 @@ class ProductDetailPage extends StatelessWidget {
           ),
           Text(
             "$qty",
-            style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold),
+            style:
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           IconButton(
             icon: const Icon(Icons.add),
@@ -231,19 +209,22 @@ class ProductDetailPage extends StatelessWidget {
       height: 50,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: minQuantity > 0 ? Colors.blue : Colors.grey.shade400,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
+        onPressed: minQuantity > 0
+            ? () {
           cartProvider.addToCart(
             productName,
             productImg,
             availableQuantity,
             price,
+            minQuantity,
           );
-        },
+        }
+            : null,
         child: const Text(
           "Add to Cart",
           style: TextStyle(color: Colors.white),

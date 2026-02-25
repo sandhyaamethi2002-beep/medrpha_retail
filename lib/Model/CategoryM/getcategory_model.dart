@@ -26,6 +26,7 @@ class CategoryData {
   final int status;
   final int subLevelId;
   final int webTypeId;
+  final int minimumOrderQuantity;
 
   CategoryData({
     required this.catId,
@@ -33,6 +34,7 @@ class CategoryData {
     required this.status,
     required this.subLevelId,
     required this.webTypeId,
+    required this.minimumOrderQuantity,
   });
 
   factory CategoryData.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class CategoryData {
       status: json['status'],
       subLevelId: json['subLevelId'],
       webTypeId: json['webTypeId'],
+      minimumOrderQuantity: json['minimumOrderQuantity'] ?? 0,
     );
   }
 }

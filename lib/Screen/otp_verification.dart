@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:medrpha/Screen/home_page.dart';
 import '../AppManager/Services/AccountS/send_login_service.dart';
+import '../ViewModel/AccountVM/checkfirmbymobile_view_model.dart';
 
 class OtpVerification extends StatefulWidget {
   final String mobileNumber;
@@ -103,14 +104,39 @@ class _OtpVerificationState extends State<OtpVerification> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("OTP Verified Successfully")),
-    );
+    setState(() => isLoading = true);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) =>  HomePage (mobileNumber: widget.mobileNumber, selectedIndex: 0,)),
-    );
+    try {
+      final viewModel = CheckFirmByMobileViewModel();
+
+      final result = await viewModel.checkFirm(widget.mobileNumber);
+
+      if (result != null && result.success == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("OTP Verified Successfully")),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomePage(
+              mobileNumber: widget.mobileNumber,
+              selectedIndex: 0,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Firm not found")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   Widget otpBox({

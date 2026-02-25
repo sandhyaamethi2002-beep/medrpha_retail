@@ -6,6 +6,7 @@ import 'package:medrpha/Screen/logout_dialog.dart';
 import 'package:medrpha/Screen/saved_item_page.dart';
 import 'contact_us.dart';
 import 'edit_profile_page.dart';
+import 'my_address.dart';
 import 'my_order_page.dart';
 import 'notification_page.dart';
 
@@ -128,8 +129,15 @@ class ProfilePage extends StatelessWidget {
             _menuTile(
               icon: CupertinoIcons.home,
               title: "My Address",
-              subtitle: "123, Flutter Lane, Dart Ville",
-              onTap: () {},
+              subtitle: "All Addresses here",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>  AddressScreen(),
+                  ),
+                );
+              },
             ),
             _menuTile(
               icon: CupertinoIcons.bell,

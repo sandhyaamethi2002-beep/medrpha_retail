@@ -8,8 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Provider/order_provider.dart';
 import 'Provider/wishlist_provider.dart';
 import 'Screen/home_page.dart';
+import 'ViewModel/AccountVM/getfirmbyid_view_model.dart';
+import 'ViewModel/AccountVM/getfirmdetail_view_model.dart';
+import 'ViewModel/AddtoCart/GetCartDetailsByFirmId_view_model.dart';
+import 'ViewModel/AddtoCart/addtocart_view_model.dart';
+import 'ViewModel/AddtoCart/getcardtotal_view_model.dart';
+import 'ViewModel/AddtoCart/placeorder_view_model.dart';
 import 'ViewModel/CategoryVM/category_detail_view_model.dart';
 import 'ViewModel/CategoryVM/getcategory_view_model.dart';
+import 'ViewModel/CategoryVM/getproductdetail_view_model.dart';
 
 
 class MyHttpOverrides extends HttpOverrides {
@@ -49,7 +56,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => GetCategoryViewModel()),
-        // ChangeNotifierProvider(create: (_) => GetProductDetailViewModel()),
+        ChangeNotifierProvider(create: (_) => GetProductDetailViewModel()),
+        ChangeNotifierProvider(create: (_) => AddToCartViewModel()),
+        ChangeNotifierProvider(create: (_) => GetCartTotalViewModel()),
+        ChangeNotifierProvider(create: (_) => GetCartDetailsByFirmIdViewModel()),
+        ChangeNotifierProvider(create: (_) => PlaceOrderViewModel()),
+        ChangeNotifierProvider(create: (_) => GetFirmByIdViewModel()),
+        ChangeNotifierProvider(create: (_) => GetFirmDetailViewModel(),),
         ],
 
       child: GetMaterialApp(

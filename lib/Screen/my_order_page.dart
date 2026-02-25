@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:medrpha/Provider/order_provider.dart';
-import 'package:medrpha/Screen/order_detail_page.dart';
 import 'package:provider/provider.dart';
+import '../ViewModel/AccountVM/getfirmbyid_view_model.dart';
+import '../widgets/order_filter_widget.dart';
+import '../widgets/firm_card.dart';
 
 class MyOrderPage extends StatefulWidget {
   const MyOrderPage({super.key});
@@ -11,10 +12,19 @@ class MyOrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<MyOrderPage> {
-  String? selectedFilter; // null = show all
-  bool showFilterOptions = false;
 
-  /// ✅ Common Text Style (Search + Filter + Dropdown same)
+  String? selectedFilter;
+  bool showFilterOptions = false;
+  List orderList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() =>
+        Provider.of<GetFirmByIdViewModel>(context, listen: false)
+            .fetchFirm(6132));
+  }
+
   TextStyle commonTextStyle() {
     return TextStyle(
       fontSize: 16,
@@ -25,210 +35,89 @@ class _OrderPageState extends State<MyOrderPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final viewModel = Provider.of<GetFirmByIdViewModel>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          "My Order",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("My Order", style: TextStyle(color: Colors.white)),
       ),
+      body: viewModel.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
 
-      body: Consumer<OrderProvider>(
-        builder: (context, provider, child) {
+          if (viewModel.firmData != null)
+            FirmCard(
+              firmId: viewModel.firmData!.firmId.toString(),
+              firmName: viewModel.firmData!.firmName,
+              city: viewModel.firmData!.address,
+              phone: viewModel.firmData!.phoneNo,
+              fullData: viewModel.firmData,
+            ),
 
-          List filteredList = selectedFilter == null
-              ? provider.orderList
-              : provider.orderList
-              .where((item) => item.status == selectedFilter)
-              .toList();
-
-          return Column(
-            children: [
-
-              /// 🔎 SEARCH + FILTER
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    /// SEARCH BOX
-                    Expanded(
-                      child: Container(
-                        height: 45,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextField(
-                          style: commonTextStyle(),
-                          decoration: InputDecoration(
-                            hintText: "Search your order here",
-                            hintStyle: commonTextStyle(),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Colors.grey.shade600,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 45,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      style: commonTextStyle(),
+                      decoration: InputDecoration(
+                        hintText: "Search your order here",
+                        hintStyle: commonTextStyle(),
+                        prefixIcon: Icon(Icons.search,
+                            color: Colors.grey.shade600),
+                        border: InputBorder.none,
                       ),
                     ),
-
-                    const SizedBox(width: 10),
-
-                    /// FILTER SECTION
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-
-                        /// FILTER BUTTON
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              showFilterOptions = !showFilterOptions;
-                            });
-                          },
-                          child: Container(
-                            width: 120,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.filter_list,
-                                  size: 18,
-                                  color: Colors.grey.shade600,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  selectedFilter ?? "Filter",
-                                  style: commonTextStyle(),
-                                ),
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  size: 18,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        /// 🔽 DROPDOWN OPTIONS
-                        if (showFilterOptions)
-                          Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(top: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                  color: Colors.grey.shade300),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 6,
-                                )
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                filterItem("Live"),
-                                filterItem("Dispatched"),
-                                filterItem("Delivered"),
-                                filterItem("Return/\nExchange"),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-
-              /// 📦 ORDER LIST
-              Expanded(
-                child: filteredList.isEmpty
-                    ? const Center(child: Text("No Orders Found"))
-                    : ListView.builder(
-                  itemCount: filteredList.length,
-                  itemBuilder: (context, index) {
-
-                    final item = filteredList[index];
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const OrderDetails(),
-                            ),
-                          );
-                        },
-                        leading: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.shopping_bag),
-                        ),
-                        title: Text(item.productName),
-                        subtitle: Text(
-                          "Qty: ${item.qty} | ${item.status}",
-                          style: commonTextStyle(),
-                        ),
-                      ),
-                    );
+                const SizedBox(width: 10),
+                OrderFilterWidget(
+                  selectedFilter: selectedFilter,
+                  showOptions: showFilterOptions,
+                  onToggle: () =>
+                      setState(() => showFilterOptions = !showFilterOptions),
+                  onSelect: (status) {
+                    setState(() {
+                      selectedFilter = status;
+                      showFilterOptions = false;
+                    });
                   },
                 ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+              ],
+            ),
+          ),
 
-  /// 🔹 FILTER ITEM
-  Widget filterItem(String status) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          selectedFilter = status;
-          showFilterOptions = false;
-        });
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        alignment: Alignment.center,
-        child: Text(
-          status,
-          style: commonTextStyle(),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.visible,
-        ),
+          Expanded(
+            child: orderList.isEmpty
+                ? const Center(
+              child: Text(
+                "No Orders Found",
+                style:
+                TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            )
+                : ListView.builder(
+              itemCount: orderList.length,
+              itemBuilder: (context, index) {
+                final item = orderList[index];
+                return ListTile(title: Text("Order"));
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
