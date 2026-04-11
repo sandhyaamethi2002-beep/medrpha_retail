@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../AppManager/Services/AddtoCart/addtocart_service.dart';
 import '../../Model/AddtoCart/addtocart_model.dart';
 
-
 class AddToCartViewModel with ChangeNotifier {
   final AddToCartService _service = AddToCartService();
   AddToCartModel? cartData;

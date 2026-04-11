@@ -12,23 +12,23 @@ class GetCartTotalService {
     required int userTypeId,
   }) async {
     final uri = Uri.parse("$baseUrl/GetCartTotals/$firmId/$userTypeId");
-    print("📌 Request URI: $uri");
+    print(" Request URI: $uri");
 
     try {
       final response = await http.get(uri);
-      print("📌 Request Body: firmId=$firmId, userTypeId=$userTypeId");
-      print("📌 Response Code: ${response.statusCode}");
-      print("📌 Response Body: ${response.body}");
+      print(" Request Body: firmId=$firmId, userTypeId=$userTypeId");
+      print(" Response Code: ${response.statusCode}");
+      print(" Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return GetCartTotalModel.fromJson(data);
       } else {
-        print("❌ Failed to fetch cart total.");
+        print(" Failed to fetch cart total.");
         return null;
       }
     } catch (e) {
-      print("❌ Error: $e");
+      print(" Error: $e");
       return null;
     }
   }

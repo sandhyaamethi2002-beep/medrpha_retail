@@ -143,9 +143,9 @@ class RegisterService {
       print("PINCODE API RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);  // Map
+        final decoded = jsonDecode(response.body);
         if (decoded['success'] == true) {
-          final List data = decoded['data'];       // List inside Map
+          final List data = decoded['data'];
           return data.map((e) => PincodeModel.fromJson(e)).toList();
         } else {
           return [];

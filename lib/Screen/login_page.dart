@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:medrpha/Screen/login_with_password.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../Screen/otp_verification.dart';
 import '../../ViewModel/AccountVM/send_login_view_model.dart';
-
+import '../../ViewModel/AccountVM/checkfirmbymobile_view_model.dart';
 
 class SendLoginView extends StatefulWidget {
   const SendLoginView({super.key});
@@ -26,38 +27,36 @@ class _SendLoginViewState extends State<SendLoginView> {
   Future<void> saveLoginData(String mobile, String otp) async {
     final prefs = await SharedPreferences.getInstance();
 
-    bool mobileSaved = await prefs.setString('mobile_number', mobile);
-    bool otpSaved = await prefs.setString('otp', otp);
+    await prefs.setString('mobile_number', mobile);
+    await prefs.setString('otp', otp);
 
-    //  Debug prints
-    print("Mobile saved successfully: $mobileSaved");
-    print("OTP saved successfully: $otpSaved");
-
-    print("Saved Mobile from Local: ${prefs.getString('mobile_number')}");
-    print("Saved OTP from Local: ${prefs.getString('otp')}");
+    print("Saved Mobile: $mobile");
+    print("Saved OTP: $otp");
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return ChangeNotifierProvider(
-      create: (_) => SendLoginViewModel(),
-      child: Consumer<SendLoginViewModel>(
-        builder: (context, vm, child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SendLoginViewModel()),
+        ChangeNotifierProvider(create: (_) => CheckFirmByMobileViewModel()),
+      ],
+      child: Consumer2<SendLoginViewModel, CheckFirmByMobileViewModel>(
+        builder: (context, vm, checkFirmVM, child) {
           return Scaffold(
             resizeToAvoidBottomInset: false,
             appBar: AppBar(),
             body: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.all(size.width * 0.05),
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+
                       SizedBox(height: size.height * 0.02),
 
                       Image.asset(
@@ -124,12 +123,15 @@ class _SendLoginViewState extends State<SendLoginView> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                           ),
                           child: const Text(
                             "Login With Password",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -143,73 +145,77 @@ class _SendLoginViewState extends State<SendLoginView> {
                           onPressed: vm.isLoading
                               ? null
                               : () async {
+
                             if (_formKey.currentState!.validate()) {
-                              final ok = await vm.sendOtp(
-                                mobileController.text.trim(),
-                              );
+
+                              String mobile = mobileController.text.trim();
+
+                              final checkFirm =
+                              await checkFirmVM.checkFirm(mobile);
+
+                              if (checkFirm == null || checkFirm.success != true) {
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Firm not found")),
+                                );
+                                return;
+                              }
+
+                              int firmId = checkFirm.firmId ?? 0;
+
+                              print("Correct FirmId From API: $firmId");
+
+                              final ok = await vm.sendOtp(mobile);
 
                               if (ok) {
-                                // save in local storage
-                                await saveLoginData(
-                                  mobileController.text.trim(),
-                                  vm.responseModel?.otp ?? "",
-                                );
 
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      vm.responseModel?.message ??
-                                          "OTP Sent",
-                                    ),
-                                  ),
+                                await saveLoginData(
+                                  mobile,
+                                  vm.responseModel?.otp ?? "",
                                 );
 
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        OtpVerification(
-                                          mobileNumber:
-                                          mobileController.text.trim(),
-                                          otp: vm.responseModel?.otp ?? "",
-                                        ),
+                                    builder: (context) => OtpVerification(
+                                      mobileNumber: mobile,
+                                      otp: vm.responseModel?.otp ?? "",
+                                      firmId: firmId,
+                                    ),
                                   ),
                                 );
+
                               } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
+
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
                                       vm.errorMessage.isNotEmpty
                                           ? vm.errorMessage
-                                          : "OTP failed",
+                                          : "OTP Failed",
                                     ),
-                                    backgroundColor: Colors.red,
                                   ),
                                 );
+
                               }
                             }
                           },
+
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          child: vm!.isLoading
-                              ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
+
+                          child: vm.isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
                               : const Text(
                             "Get Verification Code (OTP)",
                             style: TextStyle(
-                                fontSize: 16, color: Colors.white),
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -224,9 +230,3 @@ class _SendLoginViewState extends State<SendLoginView> {
     );
   }
 }
-
-// extension on Object? {
-//   get responseModel => null;
-//
-//   bool? get isLoading => null;
-// }

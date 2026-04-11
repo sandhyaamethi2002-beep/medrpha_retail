@@ -37,8 +37,8 @@ class StateModel {
     return StateModel(
       stateId: json['stateid'] ?? 0,
       stateName: json['state_name'] ?? '',
-      countryId: json['countid'] ?? 0, // fixed key
-      isActive: json['isactive'],      // nullable
+      countryId: json['countid'] ?? 0,
+      isActive: json['isactive'],
     );
   }
 }

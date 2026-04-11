@@ -1,18 +1,20 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:medrpha/Screen/home_page.dart';
 import 'package:provider/provider.dart';
 import '../../AppManager/Services/AccountS/send_login_service.dart';
+import '../../Controllers/user_controller.dart';
 import '../../ViewModel/AccountVM/verify_login_otp_view_model.dart';
-
-
 
 class VerifyLoginOtpView extends StatefulWidget {
   final String mobileNumber;
+  final int firmId;
 
   const VerifyLoginOtpView({
     super.key,
     required this.mobileNumber,
+    required this.firmId,
   });
 
   @override
@@ -81,21 +83,24 @@ class _VerifyLoginOtpViewState extends State<VerifyLoginOtpView> {
 
     final vm = context.read<VerifyLoginOtpViewModel>();
 
+    // API Call
     final response = await vm.verifyOtp(
       mobileNumber: widget.mobileNumber,
       otp: enteredOtp,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(response.message)),
+      context: context,
     );
 
     if (response.status == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(selectedIndex: 0, mobileNumber: null,),
-        ),
+      final userController = Get.find<UserController>();
+
+      await userController.saveUser(response.data!);
+
+      print("NAVIGATING WITH ID: ${response.data!['firmId']}");
+
+      Get.offAllNamed('/home', arguments: {'firmId': response.data!['firmId']});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.message)),
       );
     }
   }
@@ -170,137 +175,119 @@ class _VerifyLoginOtpViewState extends State<VerifyLoginOtpView> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return ChangeNotifierProvider(
-      create: (_) => VerifyLoginOtpViewModel(),
-      child: Consumer<VerifyLoginOtpViewModel>(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: const Text("Verification"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Consumer<VerifyLoginOtpViewModel>(
         builder: (context, vm, child) {
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-              title: const Text("Verification"),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-            body: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.all(size.width * 0.05),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: size.height * 0.02),
-
-                    Image.asset(
-                      'assets/images/img.png',
-                      fit: BoxFit.contain,
-                      height: 130,
-                      width: 130,
+          return GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(size.width * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: size.height * 0.02),
+                  Image.asset(
+                    'assets/images/img.png',
+                    fit: BoxFit.contain,
+                    height: 130,
+                    width: 130,
+                  ),
+                  const SizedBox(height: 25),
+                  const Text(
+                    "Mobile Phone Verification",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Please enter the 4-digit verification code sent to ${widget.mobileNumber}",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
                     ),
-
-                    const SizedBox(height: 25),
-
-                    const Text(
-                      "Mobile Phone Verification",
-                      style:
-                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 30),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Enter OTP",
+                      style: TextStyle(fontWeight: FontWeight.w500),
                     ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      "Please enter the 4-digit verification code sent to ${widget.mobileNumber}",
-                      textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      otpBox(controller: otp1Controller, focusNode: otp1Focus),
+                      const SizedBox(width: 10),
+                      otpBox(controller: otp2Controller, focusNode: otp2Focus),
+                      const SizedBox(width: 10),
+                      otpBox(controller: otp3Controller, focusNode: otp3Focus),
+                      const SizedBox(width: 10),
+                      otpBox(controller: otp4Controller, focusNode: otp4Focus),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: "Didn't receive the code? ",
                       style: const TextStyle(
-                        color: Colors.grey,
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Enter OTP",
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        otpBox(controller: otp1Controller, focusNode: otp1Focus),
-                        const SizedBox(width: 10),
-                        otpBox(controller: otp2Controller, focusNode: otp2Focus),
-                        const SizedBox(width: 10),
-                        otpBox(controller: otp3Controller, focusNode: otp3Focus),
-                        const SizedBox(width: 10),
-                        otpBox(controller: otp4Controller, focusNode: otp4Focus),
+                        TextSpan(
+                          text: isResending ? "Sending..." : "Resend",
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = isResending ? null : resendOtp,
+                        ),
                       ],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        text: "Didn't receive the code? ",
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: isResending ? "Sending..." : "Resend",
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = isResending ? null : resendOtp,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: (vm.isLoading || isResending)
-                            ? null
-                            : verifyOtpApi,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: vm.isLoading
-                            ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                            : const Text(
-                          "Submit",
-                          style: TextStyle(
-                              fontSize: 16, color: Colors.white),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: (vm.isLoading || isResending)
+                          ? null
+                          : verifyOtpApi,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
+                      child: vm.isLoading
+                          ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : const Text(
+                        "Submit",
+                        style:
+                        TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../Product_Categories/category_product.dart';
+import '../Product_Categories/product_screen.dart';
 
 class CategoryItem extends StatelessWidget {
   final String imgPath;
@@ -25,7 +25,7 @@ class CategoryItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => CategoryProduct(
+            builder: (_) => ProductScreen(
               title: title,
               categoryId: categoryId,
             ),

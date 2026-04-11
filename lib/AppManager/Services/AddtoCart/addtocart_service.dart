@@ -24,7 +24,7 @@ class AddToCartService {
       "priceId": priceId
     };
 
-    print("📤 Request to AddToCart: $body");
+    print("Request to AddToCart: $body");
 
     try {
       final response = await http.post(
@@ -33,7 +33,7 @@ class AddToCartService {
         body: jsonEncode(body),
       );
 
-      print("📥 Response (${response.statusCode}): ${response.body}");
+      print(" Response (${response.statusCode}): ${response.body}");
 
       if (response.statusCode == 200) {
         return AddToCartModel.fromJson(jsonDecode(response.body));

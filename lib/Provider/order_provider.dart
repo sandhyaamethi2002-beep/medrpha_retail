@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Model/order_model.dart';
+import 'order_model.dart';
 
 class OrderProvider with ChangeNotifier {
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Product_Categories/category_product.dart';
 import '../ViewModel/CategoryVM/getcategory_view_model.dart';
 import 'category_item.dart';
 
@@ -23,13 +22,11 @@ class _HomeCategoriesState extends State<HomeCategories> {
 
   @override
   Widget build(BuildContext context) {
-
     final viewModel = Provider.of<GetCategoryViewModel>(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         const Text(
           "Categories",
           style: TextStyle(
@@ -37,31 +34,33 @@ class _HomeCategoriesState extends State<HomeCategories> {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 12),
 
         viewModel.isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: CircularProgressIndicator(),
+        ))
+            : viewModel.categories.isEmpty
+            ? const Center(child: Text("No Categories Found"))
             : GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: viewModel.categories.length,
-          gridDelegate:
-          const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             childAspectRatio: 0.7,
           ),
           itemBuilder: (context, index) {
-
             final category = viewModel.categories[index];
 
             return CategoryItem(
-              imgPath: getCategoryImage(category.categoryName),
-              title: category.categoryName.toUpperCase(),
+              imgPath: getCategoryImage(category.categoryName ?? ""),
+              title: (category.categoryName ?? "N/A").toUpperCase(),
               bgColor: getCategoryColor(index),
-              categoryId: category.catId,
+              categoryId: category.catId ?? 0,
             );
           },
         ),
@@ -69,7 +68,6 @@ class _HomeCategoriesState extends State<HomeCategories> {
     );
   }
 
-  // Image mapping
   String getCategoryImage(String name) {
     switch (name.toLowerCase()) {
       case "ethical":
@@ -89,7 +87,6 @@ class _HomeCategoriesState extends State<HomeCategories> {
     }
   }
 
-  // Background color mapping
   Color getCategoryColor(int index) {
     List<Color> colors = [
       const Color(0xffE8F5E9),

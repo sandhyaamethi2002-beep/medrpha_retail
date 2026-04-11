@@ -1,23 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:medrpha/Screen/about_us.dart';
 import 'package:medrpha/Screen/home_page.dart';
 import 'package:medrpha/Screen/logout_dialog.dart';
 import 'package:medrpha/Screen/saved_item_page.dart';
+import '../Controllers/user_controller.dart';
+import '../ViewModel/AccountVM/getfirmbyid_view_model.dart';
 import 'contact_us.dart';
 import 'edit_profile_page.dart';
-import 'my_address.dart';
 import 'my_order_page.dart';
 import 'notification_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   final String mobileNumber;
-  
+
   const ProfilePage({super.key, required this.mobileNumber});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userController = Get.find<UserController>();
+      int currentFirmId = userController.firmId.value;
+
+      if (currentFirmId != 0) {
+        Provider.of<GetFirmByIdViewModel>(context, listen: false)
+            .fetchFirm(currentFirmId);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     const primaryColor = Colors.blue;
+    final viewModel = Provider.of<GetFirmByIdViewModel>(context);
+    final firm = viewModel.firmData;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -31,7 +56,7 @@ class ProfilePage extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => HomePage(mobileNumber: mobileNumber, selectedIndex: 0),
+                builder: (_) => HomePage(mobileNumber: widget.mobileNumber, selectedIndex: 0),
               ),
             );
           },
@@ -42,7 +67,9 @@ class ProfilePage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: viewModel.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         child: Column(
           children: [
             Container(
@@ -51,7 +78,7 @@ class ProfilePage extends StatelessWidget {
               color: primaryColor,
             ),
 
-            /// PROFILE CARD
+            /// PROFILE CARD (DYNAMIC)
             Transform.translate(
               offset: const Offset(0, -50),
               child: Padding(
@@ -74,9 +101,9 @@ class ProfilePage extends StatelessWidget {
                       CircleAvatar(
                         radius: 32,
                         backgroundColor: primaryColor,
-                        child: const Text(
-                          "A",
-                          style: TextStyle(
+                        child: Text(
+                          firm?.firmName != null ? firm!.firmName[0].toUpperCase() : "",
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
@@ -87,58 +114,43 @@ class ProfilePage extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              "User",
-                              style: TextStyle(
-                                fontSize: 20,
+                              firm?.firmName ?? "No Name",
+                              style: const TextStyle(
+                                fontSize: 19,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Text("1234567890",
-                                style: TextStyle(color: Colors.grey)),
-                            SizedBox(height: 2),
-                            Text("abc@gmail.com",
-                                style: TextStyle(color: Colors.grey)),
+                            const SizedBox(height: 4),
+                            Text(firm?.phoneNo ?? widget.mobileNumber,
+                                style: const TextStyle(color: Colors.grey)),
+                            const SizedBox(height: 2),
+                            Text(firm?.email ?? "Email not provided",
+                                style: const TextStyle(color: Colors.grey, fontSize: 13)),
                           ],
                         ),
                       ),
-                      // const Icon(CupertinoIcons.pencil,
-                      //     color: Colors.black87),
-
-                      IconButton(
-                        icon: const Icon(CupertinoIcons.pencil, color: Colors.black87),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => EditProfilePage(mobileNumber: mobileNumber),
-                              )
-                              );
-                        }
-                      )
+                      // IconButton(
+                      //     icon: const Icon(CupertinoIcons.pencil, color: Colors.black87),
+                      //     onPressed: () {
+                      //       Navigator.push(
+                      //           context,
+                      //           MaterialPageRoute(builder: (_) => EditProfilePage(mobileNumber: widget.mobileNumber),
+                      //           )
+                      //       );
+                      //     }
+                      // )
                     ],
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 2),
 
             /// MENU ITEMS
-            _menuTile(
-              icon: CupertinoIcons.home,
-              title: "My Address",
-              subtitle: "All Addresses here",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>  AddressScreen(),
-                  ),
-                );
-              },
-            ),
+
             _menuTile(
               icon: CupertinoIcons.bell,
               title: "Notification",
@@ -214,11 +226,10 @@ class ProfilePage extends StatelessWidget {
                   context: context,
                   barrierDismissible: false,
                   builder: (_) => LogoutDialog(
-                    mobileNumber: mobileNumber,
+                    mobileNumber: widget.mobileNumber,
                   ),
                 );
               },
-
             ),
 
             const SizedBox(height: 90),
@@ -243,7 +254,7 @@ class ProfilePage extends StatelessWidget {
             title,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(subtitle),
+          subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: onTap,
         ),

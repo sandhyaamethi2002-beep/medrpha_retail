@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../../AppManager/Services/AccountS/send_login_service.dart';
 import '../../Model/AccountM/send_login_model.dart';
 
-
-
 class SendLoginViewModel extends ChangeNotifier {
   final SendLoginService _service = SendLoginService();
 

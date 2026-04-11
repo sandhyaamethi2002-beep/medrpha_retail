@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../AppManager/Services/CategoryS/category_detail_service.dart';
-import '../../Model/CategoryM/category_detail_model.dart';
+import '../../AppManager/Services/CategoryS/GetByCategory_service.dart';
+import '../../Model/CategoryM/GetByCategory_model.dart';
 
 class CategoryDetailViewModel extends ChangeNotifier {
   final CategoryDetailService _service = CategoryDetailService();

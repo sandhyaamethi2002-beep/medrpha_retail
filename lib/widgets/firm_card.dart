@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'firm_detail_card.dart';
 
-
 class FirmCard extends StatelessWidget {
   final String firmName;
   final String firmId;

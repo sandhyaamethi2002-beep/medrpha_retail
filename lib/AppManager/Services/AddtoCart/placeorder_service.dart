@@ -11,8 +11,8 @@ class PlaceOrderService {
     try {
       final uri = Uri.parse(baseUrl);
 
-      print("🔵 URI: $uri");
-      print("🟡 REQUEST BODY: ${jsonEncode(requestModel.toJson())}");
+      print(" URI: $uri");
+      print(" REQUEST BODY: ${jsonEncode(requestModel.toJson())}");
 
       final response = await http.post(
         uri,
@@ -22,8 +22,8 @@ class PlaceOrderService {
         body: jsonEncode(requestModel.toJson()),
       );
 
-      print("🟢 RESPONSE STATUS: ${response.statusCode}");
-      print("🟢 RESPONSE BODY: ${response.body}");
+      print(" RESPONSE STATUS: ${response.statusCode}");
+      print(" RESPONSE BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         return PlaceOrderResponseModel.fromJson(
@@ -32,7 +32,7 @@ class PlaceOrderService {
         return null;
       }
     } catch (e) {
-      print("🔴 ERROR: $e");
+      print(" ERROR: $e");
       return null;
     }
   }

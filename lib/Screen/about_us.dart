@@ -123,11 +123,11 @@ class AboutSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
-        /// ✅ TITLE (NO ROW)
+        ///  TITLE
         Text(
           title,
           style: GoogleFonts.poppins(
-            fontSize: 26, // 28 bhi rakh sakti ho
+            fontSize: 26,
             fontWeight: FontWeight.w600,
             color: Colors.grey[800],
           ),

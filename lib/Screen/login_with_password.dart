@@ -133,7 +133,6 @@ class _LoginWithPasswordState extends State<LoginWithPassword> {
                     ),
                     const SizedBox(height: 40),
 
-                    // --- Mobile Number Field ---
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text("Mobile Number", style: TextStyle(fontWeight: FontWeight.w600)),
@@ -151,7 +150,6 @@ class _LoginWithPasswordState extends State<LoginWithPassword> {
                     ),
 
                     const SizedBox(height: 20),
-
 
                     const Align(
                       alignment: Alignment.centerLeft,

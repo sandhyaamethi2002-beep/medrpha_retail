@@ -23,13 +23,6 @@ class ReturnExchange extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // const PolicySection(
-              //   title: "",
-              //   text: "Updated at 2022-03-01",
-              // ),
-              //
-              // const SizedBox(height: 12),
-
               Material(
                 elevation: 4,
                 borderRadius: BorderRadius.circular(12),
@@ -116,8 +109,6 @@ class ReturnExchange extends StatelessWidget {
               const SizedBox(height: 20,),
               const PolicySection(title: "Changes To Our Return & Refund Policy",
                   text:"Should we update, amend or make any changes to this document so that they accurately reflect our Service and policies. Unless otherwise required by law, those changes will be prominently posted here. Then, if you continue to use the Service, you will be bound by the updated Return & Refund Policy. If you do not want to agree to this or any updated Return & Refund Policy, you can delete your account."),
-
-
             ],
           ),
         ),
@@ -128,7 +119,7 @@ class ReturnExchange extends StatelessWidget {
 }
 
 
-/// Reusable widget (same as AboutUs style)
+/// Reusable widget
 class PolicySection extends StatelessWidget {
   final String title;
   final String text;
@@ -145,12 +136,12 @@ class PolicySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
-        // ✅ Only show title if not empty
+        //  Only show title if not empty
         if (title.isNotEmpty) ...[
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 20,   // smaller = better
+              fontSize: 20,
               fontWeight: FontWeight.w600,
               color: Colors.grey[800],
             ),

@@ -10,25 +10,25 @@ class CountryService {
     try {
       Uri uri = Uri.parse(baseUrl);
 
-      print("📌 URI: $uri");
+      print(" URI: $uri");
 
-      print("📤 REQUEST:");
+      print(" REQUEST:");
       print("Method: GET");
 
       final response = await http.get(uri);
 
-      print("📥 RESPONSE STATUS: ${response.statusCode}");
-      print("📥 RESPONSE BODY: ${response.body}");
+      print(" RESPONSE STATUS: ${response.statusCode}");
+      print(" RESPONSE BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         return CountryResponse.fromJson(jsonData);
       } else {
-        print("❌ Failed to fetch countries");
+        print(" Failed to fetch countries");
         return null;
       }
     } catch (e) {
-      print("❌ Exception: $e");
+      print(" Exception: $e");
       return null;
     }
   }

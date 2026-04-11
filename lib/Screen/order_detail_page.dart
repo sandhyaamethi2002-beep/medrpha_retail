@@ -1,166 +1,183 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../ViewModel/OrderVM/GetOrderDetails_vm.dart';
+import '../ViewModel/OrderVM/GetOrderInvoice_vm.dart';
+import '../widgets/invoice_details_widget.dart';
+import '../widgets/order_detail_card.dart';
 
-class OrderDetails extends StatelessWidget {
-  const OrderDetails({super.key});
+class OrderDetailsPage extends StatefulWidget {
+  final String orderId;
+  const OrderDetailsPage({super.key, this.orderId = "7725"});
+
+  @override
+  State<OrderDetailsPage> createState() => _OrderDetailsPageState();
+}
+
+class _OrderDetailsPageState extends State<OrderDetailsPage> {
+
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "N/A";
+    try {
+      DateTime dateTime = DateTime.parse(dateStr);
+      return DateFormat('MMMM-yyyy').format(dateTime);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<GetOrderDetailsVM>(context, listen: false)
+          .fetchOrderDetails(int.parse(widget.orderId));
+      Provider.of<GetOrderInvoiceVM>(context, listen: false)
+          .fetchOrderInvoice(int.parse(widget.orderId));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-
+      backgroundColor: const Color(0xFFF4F7F9),
       appBar: AppBar(
         backgroundColor: Colors.blue,
+        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          "Order Details",
-          style: GoogleFonts.poppins(
-              color: Colors.white),
+          "Order #${widget.orderId}",
+          style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
+      body: Consumer<GetOrderDetailsVM>(
+        builder: (context, vm, child) {
+          if (vm.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          final filteredItems = vm.orders.where((item) {
+            final productName = (item.productName ?? "").toLowerCase();
+            final companyName = (item.compnayName ?? "").toLowerCase();
+            final query = _searchQuery.toLowerCase();
 
-            // ORDER CARD
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
+            return productName.contains(query) || companyName.contains(query);
+          }).toList();
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "Order ORD-2026-0016",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Icon(Icons.assignment_outlined,
-                            color: Colors.blue)
-                      ],
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSearchBar(),
+
+                const SizedBox(height: 20),
+                _sectionTitle("Order Products"),
+
+                if (filteredItems.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Text("No products found matching your search"),
                     ),
+                  )
+                else
+                  ListView.builder(
+                    itemCount: filteredItems.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final item = filteredItems[index];
 
-                    const Divider(height: 25),
+                      return OrderDetailCard(
+                        name: item.productName ?? "",
+                        subtitle: "${item.compnayName ?? 'N/A'} | ${item.categoryName ?? ''}",
+                        qty: "${item.orderedQty} ${item.unitType ?? ''}",
+                        batch: item.batchNumber ?? "",
+                        expiry: _formatDate(item.dtExpiryDate),
+                        mrp: item.unitMrp.toString(),
+                        price: item.companyPrice.toString(),
+                        total: item.totalPrice.toString(),
+                      );
+                    },
+                  ),
 
-                    _infoRow("Status:", "Ordered", Colors.green),
-                    _infoRow("Order Date:", "Feb 06, 2026", Colors.black),
-                    _infoRow("Total Amount:", "₹550.00", Colors.blue),
+                const SizedBox(height: 20),
 
-                  ],
-                ),
-              ),
+                Consumer<GetOrderInvoiceVM>(
+                  builder: (context, invoiceVM, child) {
+                    if (invoiceVM.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (invoiceVM.invoiceList.isEmpty) {
+                      return const Text("No Invoice Data");
+                    }
+
+                    final invoice = invoiceVM.invoiceList.first;
+                    return InvoiceDetailsWidget(
+                      transactionId: invoice.transactionId ?? "",
+                      productName: invoice.productName ?? "",
+                      companyName: invoice.compnayName ?? "",
+                      category: invoice.compnayName ?? "",
+                      paymentMode: invoice.paymentStatusMode ?? "",
+                      paymentStatus: invoice.paymentStatusText ?? "",
+                    );
+                  },
+                )
+              ],
             ),
+          );
+        },
+      ),
+    );
+  }
 
-            const SizedBox(height: 20),
-
-            /// ITEMS
-            const Text(
-              "Items (3)",
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            _itemTile("8", "85027", "2 x ₹350.00", "₹700.00"),
-            _itemTile("F", "Full Body Test", "1 x ₹200.00", "₹200.00"),
-            _itemTile("H", "HB001", "1 x ₹350.00", "₹350.00"),
-
-            const SizedBox(height: 20),
-
-            /// PRICING
-            const Text(
-              "Pricing",
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            _priceRow("Subtotal (Approx)", "₹550.00"),
-            _priceRow("Discount", "₹0.00", color: Colors.red),
-
-            const Divider(height: 25),
-
-            _priceRow("Total Paid", "₹550.00",
-                isBold: true, color: Colors.blue),
-
-          ],
+  // Search Bar UI design
+  Widget _buildSearchBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value;
+          });
+        },
+        decoration: InputDecoration(
+          hintText: "Search product or company...",
+          hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+          prefixIcon: const Icon(Icons.search, color: Colors.blue),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+              icon: const Icon(Icons.clear, size: 20),
+              onPressed: () {
+                _searchController.clear();
+                setState(() { _searchQuery = ""; });
+              })
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 15),
         ),
       ),
     );
   }
 
-  /// INFO ROW
-  static Widget _infoRow(String title, String value, Color color) {
+  Widget _sectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title,
-              style: const TextStyle(color: Colors.grey, fontSize: 15)),
-          Text(value,
-              style: TextStyle(
-                  color: color,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
-  }
-
-  /// ITEM TILE
-  static Widget _itemTile(
-      String letter, String title, String subtitle, String price) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 4),
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(child: Text(letter)),
-      ),
-      title: Text(title,
-          style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(subtitle),
-      trailing: Text(price,
-          style: const TextStyle(
-              fontWeight: FontWeight.w600, fontSize: 15)),
-    );
-  }
-
-  /// PRICE ROW
-  static Widget _priceRow(String title, String value,
-      {bool isBold = false, Color color = Colors.black}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight:
-                  isBold ? FontWeight.bold : FontWeight.normal)),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight:
-                  isBold ? FontWeight.bold : FontWeight.normal,
-                  color: color)),
-        ],
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }

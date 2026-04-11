@@ -11,11 +11,9 @@ class GetFirmByIdModel {
 
   factory GetFirmByIdModel.fromJson(Map<String, dynamic> json) {
     return GetFirmByIdModel(
-      success: json['success'],
-      message: json['message'],
-      data: json['data'] != null
-          ? FirmData.fromJson(json['data'])
-          : null,
+      success: json['success'] ?? false,
+      message: json['message'] ?? "",
+      data: json['data'] != null ? FirmData.fromJson(json['data']) : null,
     );
   }
 }
@@ -24,24 +22,48 @@ class FirmData {
   final int firmId;
   final String firmName;
   final String? phoneNo;
-  final String? cityName;
+  final String? personName;
+  final String? email;
   final String? address;
+  final String? cityName;
+  final String? stateName;
+  final String? countryName;
+  final String? gstNo;
+  final int? completeRegStatus;
+  final int? hdnDrugsyesno;
+  final int status;
 
   FirmData({
     required this.firmId,
     required this.firmName,
     this.phoneNo,
-    this.cityName,
+    this.personName,
+    this.email,
     this.address,
+    this.cityName,
+    this.stateName,
+    this.countryName,
+    this.gstNo,
+    this.completeRegStatus,
+    this.hdnDrugsyesno,
+    required this.status,
   });
 
   factory FirmData.fromJson(Map<String, dynamic> json) {
     return FirmData(
-      firmId: json['firmId'],
+      firmId: json['firmId'] ?? 0,
       firmName: json['firmName'] ?? "",
       phoneNo: json['phoneNo'],
-      cityName: json['cityName'],
+      personName: json['personName'],
+      email: json['email'],
       address: json['address'],
+      cityName: json['cityName'],
+      stateName: json['stateName'],
+      countryName: json['countryName'],
+      gstNo: json['gstNo'],
+      completeRegStatus: json['completeRegStatus'],
+      hdnDrugsyesno: json['hdnDrugsyesno'],
+      status: json['status'],
     );
   }
 }

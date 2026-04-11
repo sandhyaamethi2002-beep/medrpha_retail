@@ -42,7 +42,6 @@ class YesNoDropdown extends StatelessWidget {
           items: ["Yes", "No"]
               .map((val) => DropdownMenuItem<String>(
             value: val,
-            // Yahan se 'const' hata diya gaya hai kyunki 'val' dynamic hai
             child: Text(
               val,
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -54,7 +53,6 @@ class YesNoDropdown extends StatelessWidget {
           },
         ),
 
-        // "Yes" hone par children dikhenge
         if (selectedValue.value == "Yes")
           Padding(
             padding: const EdgeInsets.only(top: 15),

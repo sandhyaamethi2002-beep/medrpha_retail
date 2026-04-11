@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../AppManager/Services/RegistrationS/city_service.dart';
-import '../Model/RegistrationM/city_model.dart';
+import '../../AppManager/Services/RegistrationS/city_service.dart';
+import '../../Model/RegistrationM/city_model.dart';
 
 class CityViewModel extends GetxController {
   var cityList = <CityModel>[].obs;

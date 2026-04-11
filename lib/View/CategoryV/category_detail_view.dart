@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../ViewModel/CategoryVM/category_detail_view_model.dart';
-
-
+import '../../ViewModel/CategoryVM/GetByCategory_vm.dart';
 
 class CategoryDetailView extends StatefulWidget {
   final int categoryId;
@@ -30,16 +28,12 @@ class _CategoryDetailViewState extends State<CategoryDetailView> {
   }
 
   String _getImageUrl(String? productImg) {
-    // If API gives null image
     if (productImg == null || productImg.isEmpty) {
       return "https://via.placeholder.com/150";
     }
 
-    // If API returns full URL already
     if (productImg.startsWith("http")) return productImg;
 
-    // If API returns only filename -> you can adjust base URL if needed
-    // Currently API is giving filename only, so placeholder is safe.
     return "https://via.placeholder.com/150";
   }
 
@@ -85,7 +79,6 @@ class _CategoryDetailViewState extends State<CategoryDetailView> {
             itemCount: vm.products.length,
             itemBuilder: (context, index) {
               final item = vm.products[index];
-
 
             },
           );

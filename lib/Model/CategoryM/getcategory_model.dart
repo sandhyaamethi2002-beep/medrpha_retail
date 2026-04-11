@@ -21,20 +21,20 @@ class GetCategoryModel {
 }
 
 class CategoryData {
-  final int catId;
-  final String categoryName;
-  final int status;
-  final int subLevelId;
-  final int webTypeId;
-  final int minimumOrderQuantity;
+  final int? catId;
+  final String? categoryName;
+  final int? status;
+  final int? subLevelId;
+  final int? webTypeId;
+  final int? minimumOrderQuantity;
 
   CategoryData({
-    required this.catId,
-    required this.categoryName,
-    required this.status,
-    required this.subLevelId,
-    required this.webTypeId,
-    required this.minimumOrderQuantity,
+    this.catId,
+    this.categoryName,
+    this.status,
+    this.subLevelId,
+    this.webTypeId,
+    this.minimumOrderQuantity,
   });
 
   factory CategoryData.fromJson(Map<String, dynamic> json) {

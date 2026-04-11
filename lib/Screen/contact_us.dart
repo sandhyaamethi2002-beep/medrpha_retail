@@ -48,7 +48,6 @@ class ContactUs extends StatelessWidget {
             children: [
               const SizedBox(height: 25),
 
-              /// 🔹 Card 1
               buildCard([
                 infoRow(
                   Icons.location_on,
@@ -65,7 +64,6 @@ class ContactUs extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// 🔹 Card 2
               buildCard([
                 infoRow(
                   Icons.phone_forwarded,
@@ -107,7 +105,6 @@ class ContactUs extends StatelessWidget {
     );
   }
 
-  /// 🔹 Card UI
   Widget buildCard(List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -125,7 +122,7 @@ class ContactUs extends StatelessWidget {
     );
   }
 
-  /// 🔹 Info Row with Blue Arrow
+  ///  Info Row with Blue Arrow
   Widget infoRow(
       IconData icon,
       String text, {

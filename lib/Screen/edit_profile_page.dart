@@ -59,7 +59,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           children: [
             const SizedBox(height: 20),
 
-            /// 🔹 Profile Image (Tap to open gallery)
+            ///  Profile Image
             Center(
               child: GestureDetector(
                 onTap: _pickImage,

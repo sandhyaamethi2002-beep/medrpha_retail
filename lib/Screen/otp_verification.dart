@@ -1,17 +1,22 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:medrpha/Screen/home_page.dart';
 import '../AppManager/Services/AccountS/send_login_service.dart';
+import '../Controllers/user_controller.dart';
 import '../ViewModel/AccountVM/checkfirmbymobile_view_model.dart';
 
 class OtpVerification extends StatefulWidget {
   final String mobileNumber;
   final String otp;
+  final int firmId;
 
   const OtpVerification({
     super.key,
     required this.mobileNumber,
     required this.otp,
+    required this.firmId,
   });
 
   @override
@@ -57,7 +62,6 @@ class _OtpVerificationState extends State<OtpVerification> {
       if (response.status == true) {
         apiOtp = response.otp ?? "";
 
-        // clear old otp boxes
         otp1Controller.clear();
         otp2Controller.clear();
         otp3Controller.clear();
@@ -108,12 +112,21 @@ class _OtpVerificationState extends State<OtpVerification> {
 
     try {
       final viewModel = CheckFirmByMobileViewModel();
-
       final result = await viewModel.checkFirm(widget.mobileNumber);
 
       if (result != null && result.success == true) {
+
+        final userController = Get.find<UserController>();
+
+        await userController.saveUser({
+          'firmId': result.firmId,
+          'phoneNo': widget.mobileNumber,
+          'user_type_id': 1,
+          'adminId': 1,
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("OTP Verified Successfully")),
+          const SnackBar(content: Text("OTP Verified & Data Saved")),
         );
 
         Navigator.pushReplacement(
@@ -131,6 +144,7 @@ class _OtpVerificationState extends State<OtpVerification> {
         );
       }
     } catch (e) {
+      print("Error during verification: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );

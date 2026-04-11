@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:medrpha/Screen/profile_page.dart';
 import 'package:provider/provider.dart';
+import '../Controllers/user_controller.dart';
 import '../Provider/cart_provider.dart';
+import '../ViewModel/AccountVM/getfirmbyid_view_model.dart';
 import '../widgets/home_banner.dart';
 import '../widgets/home_categories.dart';
 import '../widgets/home_new_banner.dart';
@@ -12,14 +15,13 @@ import 'cart_page.dart';
 import 'my_order_page.dart';
 
 class HomePage extends StatefulWidget {
-
   final dynamic mobileNumber;
 
   const HomePage({
     super.key,
-    required this.mobileNumber, required int selectedIndex,
+    required this.mobileNumber,
+    required int selectedIndex,
   });
-
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -27,14 +29,78 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  int _navIndex = 0;
 
   final ScrollController _scrollController = ScrollController();
-  // final GlobalKey _categoriesKey = GlobalKey();
+  final GlobalKey _categoriesKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      int finalId = 0;
+      if (Get.arguments != null && Get.arguments is Map) {
+        finalId = Get.arguments['firmId'] ?? 0;
+      } else if (Get.arguments is int) {
+        finalId = Get.arguments;
+      }
+
+      if (finalId == 0) {
+        finalId = Get.find<UserController>().firmId.value;
+      }
+
+      if (finalId != 0) {
+        Provider.of<GetFirmByIdViewModel>(context, listen: false).fetchFirm(finalId);
+      } else {
+      }
+    });
+  }
+
+  void _scrollToCategories() {
+    final context = _categoriesKey.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _navIndex = index;
     });
+
+    if (index == 0) {
+      if (_selectedIndex == 0) {
+        _scrollToTop();
+      } else {
+        setState(() => _selectedIndex = 0);
+      }
+    } else if (index == 1) {
+      if (_selectedIndex != 0) {
+        setState(() => _selectedIndex = 0);
+        Future.delayed(const Duration(milliseconds: 100), () => _scrollToCategories());
+      } else {
+        _scrollToCategories();
+      }
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   Widget homeScreen() {
@@ -45,25 +111,14 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
+
             HomeBanner(mobileNumber: widget.mobileNumber),
-
             const SizedBox(height: 10),
-
             const HomeNewBanner(),
-            // buildVerticalCard(
-            //   CupertinoIcons.shopping_cart,
-            //   "Start Ordering Now",
-            //   "Browse and order products for your shop from top sellers",
-            // ),
-
             const SizedBox(height: 16),
-
-            const HomeCategories(),
-
+            HomeCategories(key: _categoriesKey),
             const SizedBox(height: 30),
-
             const HomePharmaGallery(),
-
             const SizedBox(height: 20),
           ],
         ),
@@ -75,115 +130,83 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_selectedIndex != 0) {
+        if (_navIndex != 0) {
           setState(() {
+            _navIndex = 0;
             _selectedIndex = 0;
           });
           return false;
         }
-
         SystemNavigator.pop();
         return false;
       },
       child: Scaffold(
-
-        appBar:(_selectedIndex == 2 || _selectedIndex == 3)
+        appBar: (_selectedIndex == 2 || _selectedIndex == 3)
             ? null
-          : AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: 60,
-        backgroundColor: Colors.blue,
-        title: Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 40,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search...",
-                    prefixIcon: Icon(CupertinoIcons.search),
-                    border: InputBorder.none,
+            : AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: 60,
+          backgroundColor: Colors.blue,
+          title: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: "Search...",
+                      prefixIcon: Icon(CupertinoIcons.search, size: 20),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-
-            // CART ICON WITH BADGE
-            Consumer<CartProvider>(
-              builder: (context, cart, child) {
-                int totalQty = cart.cartList.fold(
-                    0, (sum, item) => sum + item.qty);
-
-                return Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        CupertinoIcons.shopping_cart,
-                        color: Colors.white,
-                        size: 28,
+              const SizedBox(width: 10),
+              Consumer<CartProvider>(
+                builder: (context, cart, child) {
+                  int totalQty = cart.cartList.fold(0, (sum, item) => sum + item.qty);
+                  return Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.shopping_cart, color: Colors.white, size: 28),
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const CartPage()));
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const CartPage(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    if (totalQty > 0)
-                      Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 18,
-                            minHeight: 18,
-                          ),
-                          child: Text(
-                            '$totalQty',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
+                      if (totalQty > 0)
+                        Positioned(
+                          right: 4,
+                          top: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                            child: Text('$totalQty', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                           ),
                         ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-      ),
-
-      body: Stack(
+        body: Stack(
           children: [
             IndexedStack(
               index: _selectedIndex,
               children: [
                 homeScreen(),
-                homeScreen(),
+                const SizedBox(),
                 const MyOrderPage(),
-                const ProfilePage(mobileNumber: '',),
+                const ProfilePage(mobileNumber: ''),
               ],
             ),
-
-            // MINI CART BAR
             if (_selectedIndex == 0)
               Positioned(
                 bottom: 10,
@@ -191,48 +214,20 @@ class _HomePageState extends State<HomePage> {
                 right: 10,
                 child: Consumer<CartProvider>(
                   builder: (context, cart, child) {
-
-                    if (cart.cartList.isEmpty) {
-                      return const SizedBox();
-                    }
-                    int totalQty = cart.cartList.fold(
-                      0,
-                          (sum, item) => sum + item.qty,
-                    );
-
+                    if (cart.cartList.isEmpty) return const SizedBox();
+                    int totalQty = cart.cartList.fold(0, (sum, item) => sum + item.qty);
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CartPage(),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(12)),
                         child: Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "$totalQty items added",
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-
-                            const Text(
-                              "View Cart",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                            Text("$totalQty items added", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            const Text("View Cart", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -248,20 +243,14 @@ class _HomePageState extends State<HomePage> {
             highlightColor: Colors.transparent,
           ),
           child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
+            currentIndex: _navIndex,
             onTap: _onItemTapped,
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.blue,
             selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white,
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.normal,
-              fontSize: 14,
-            ),
+            unselectedItemColor: Colors.white.withOpacity(0.6),
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(CupertinoIcons.home, size: 24),
@@ -269,13 +258,13 @@ class _HomePageState extends State<HomePage> {
                 label: "Home",
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.square_grid_2x2,  size: 24),
-                activeIcon: Icon(CupertinoIcons.square_grid_2x2,  size: 26),
+                icon: Icon(CupertinoIcons.square_grid_2x2, size: 24),
+                activeIcon: Icon(CupertinoIcons.square_grid_2x2, size: 26),
                 label: "Categories",
               ),
               BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.cube_box,  size: 24),
-                activeIcon: Icon(CupertinoIcons.cube_box,  size: 26),
+                icon: Icon(CupertinoIcons.cube_box, size: 24),
+                activeIcon: Icon(CupertinoIcons.cube_box, size: 26),
                 label: "My Order",
               ),
               BottomNavigationBarItem(
@@ -290,4 +279,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-

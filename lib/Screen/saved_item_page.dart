@@ -121,16 +121,21 @@ class SavedItemsPage extends StatelessWidget {
                               ),
                             ),
                             onPressed: () {
-                              final cartProvider =
-                              context.read<CartProvider>();
+                              final cartProvider = context.read<CartProvider>();
+
+                              double initialTotalSale = item.price * (item.minQuantity > 0 ? item.minQuantity : 1);
+                              double initialTotalMrp = item.price * (item.minQuantity > 0 ? item.minQuantity : 1);
 
                               /// ADD TO CART
                               cartProvider.addToCart(
+                                0,
                                 item.productName,
                                 item.imageUrl,
                                 item.status,
                                 item.price,
                                 item.minQuantity,
+                                tSalePrice: initialTotalSale,
+                                tmrp: initialTotalMrp,
                               );
 
                               /// REMOVE FROM SAVED
